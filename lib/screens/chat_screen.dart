@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/chat_controller.dart';
 import '../widgets/base_scaffold.dart';
 import '../widgets/typing_indicator.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChatScreen extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
@@ -16,7 +17,7 @@ class ChatScreen extends StatelessWidget {
     final chatController = Get.put<ChatController>(ChatController());
 
     return BaseScaffold(
-      appBarTitle: "AI Asistan",
+      appBarTitle: AppLocalizations.of(context)!.chatScreenTitle,
       body: Obx(() {
         return Column(
           children: [
@@ -60,8 +61,8 @@ class ChatScreen extends StatelessWidget {
                     child: TextField(
                       enabled: !chatController.isLoading.value,
                       controller: _controller,
-                      decoration: const InputDecoration(
-                        hintText: 'Enter your message',
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.chatScreenInputHint,
                         border: OutlineInputBorder(),
                       ),
                     ),

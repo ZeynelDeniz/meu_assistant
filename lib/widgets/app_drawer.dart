@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:get/get.dart';
@@ -12,6 +13,18 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<DrawerItem> screensInDrawer = [
+      DrawerItem(
+        dTitle: AppLocalizations.of(context)!.homeScreenTitle,
+        dRoute: "/",
+        icon: Icons.home,
+      ),
+      DrawerItem(
+        dTitle: AppLocalizations.of(context)!.chatScreenTitle,
+        dRoute: "/chat",
+        icon: Icons.chat,
+      ),
+    ];
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -20,11 +33,11 @@ class AppDrawer extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
             ),
-            child: const Column(
+            child: Column(
               children: [
                 Spacer(),
                 Text(
-                  'Meu Asistan',
+                  AppLocalizations.of(context)!.appTitle,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -35,10 +48,10 @@ class AppDrawer extends StatelessWidget {
           ),
           Row(
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  "Tema",
+                  AppLocalizations.of(context)!.theme,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -156,8 +169,3 @@ class DrawerItem {
     this.icon,
   });
 }
-
-final List<DrawerItem> screensInDrawer = [
-  DrawerItem(dTitle: "Ana Sayfa", dRoute: "/", icon: Icons.home),
-  DrawerItem(dTitle: "AI Asistan", dRoute: "/chat", icon: Icons.chat),
-];

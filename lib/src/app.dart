@@ -8,7 +8,6 @@ import '../screens/chat_screen.dart';
 import 'settings/settings_controller.dart';
 import 'settings/theme_data.dart';
 
-/// The Widget that configures your application.
 class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
@@ -17,18 +16,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsController = Get.find<SettingsController>();
-    // Glue the SettingsController to the MaterialApp.
-    //
-    // The ListenableBuilder Widget listens to the SettingsController for changes.
-    // Whenever the user updates their settings, the MaterialApp is rebuilt.
+
     return Obx(() {
       return GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        // Providing a restorationScopeId allows the Navigator built by the
-        // MaterialApp to restore the navigation stack when a user leaves and
-        // returns to the app after it has been killed while running in the
-        // background.
-
         // Provide the generated AppLocalizations to the MaterialApp. This
         // allows descendant Widgets to display the correct translations
         // depending on the user's locale.
@@ -40,6 +31,7 @@ class MyApp extends StatelessWidget {
         ],
         supportedLocales: const [
           Locale('en', ''), // English, no country code
+          Locale('tr', ''), // Turkish, no country code
         ],
 
         // Use AppLocalizations to configure the correct application title
@@ -49,20 +41,10 @@ class MyApp extends StatelessWidget {
         // directory.
         onGenerateTitle: (BuildContext context) => AppLocalizations.of(context)!.appTitle,
 
-        // Define a light and dark color theme. Then, read the user's
-        // preferred ThemeMode (light, dark, or system default) from the
-
-        // SettingsController to display the correct theme.
-        // theme: ThemeData(),
-        // darkTheme: ThemeData.dark(),
-
         // Using custom light and dark themes
         theme: lightTheme, // Your custom light theme
         darkTheme: darkTheme, // Your custom dark theme
         themeMode: settingsController.themeMode.value,
-
-        // Define a function to handle named routes in order to support
-        // Flutter web url navigation and deep linking.
         initialRoute: HomeScreen.routeName,
         getPages: [
           GetPage(

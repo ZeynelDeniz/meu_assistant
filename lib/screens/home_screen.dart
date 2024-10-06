@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/base_scaffold.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
@@ -11,11 +12,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const BaseScaffold(
-      appBarTitle: 'Home',
-      body: Center(
-        child: Text('Home Screen'),
-      ),
+    return BaseScaffold(
+      appBarTitle: AppLocalizations.of(context)!.homeScreenTitle,
+      body: Center(child: Text('')),
     );
   }
 }

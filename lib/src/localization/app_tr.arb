@@ -1,0 +1,13 @@
+{
+  "appTitle": "MEU Asistan",
+  "@appTitle": {
+    "description": "Uygulama Başlığı"
+  },
+  "theme": "Theme",
+  "homeScreenTitle": "Ana Sayfa",
+  "homeScreenBody": "Ana Sayfaya Hoşgeldiniz",
+  "chatScreenTitle": "AI Asistan",
+  "chatScreenInputHint": "Mesajınızı girin",
+  "chatScreenSendButton": "Gönder",
+  "chatScreenTypingIndicator": "Yazıyor..."
+}

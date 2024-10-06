@@ -1,6 +1,13 @@
 {
-  "appTitle": "meu_assistant",
+  "appTitle": "MEU Assistant",
   "@appTitle": {
     "description": "The title of the application"
-  }
+  },
+  "theme": "Theme",
+  "homeScreenTitle": "Home",
+  "homeScreenBody": "Welcome to the Home Screen",
+  "chatScreenTitle": "AI Assistant",
+  "chatScreenInputHint": "Enter your message",
+  "chatScreenSendButton": "Send",
+  "chatScreenTypingIndicator": "Typing..."
 }
