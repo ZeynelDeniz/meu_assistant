@@ -12,8 +12,9 @@ class ChatController extends GetxController {
   final RxBool isLoading = true.obs;
 
   final ScrollController scrollController = ScrollController();
+  final RxBool showScrollDownButton = false.obs;
 
-  void _scrollToBottom() {
+  void jumpToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
         scrollController.jumpTo(
@@ -23,10 +24,23 @@ class ChatController extends GetxController {
     });
   }
 
+  void animateToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
   @override
   void onInit() {
     super.onInit();
     _initDatabase();
+    scrollController.addListener(_scrollListener);
   }
 
   @override
@@ -35,6 +49,17 @@ class ChatController extends GetxController {
     super.dispose();
   }
 
+  void _scrollListener() {
+    const double threshold = 1000.0; // Adjust this value as needed
+
+    if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - threshold) {
+      // User is near the bottom
+      showScrollDownButton.value = false;
+    } else {
+      // User has scrolled up more than the threshold
+      showScrollDownButton.value = true;
+    }
+  }
   //* Uncomment this method and add to onInit to delete the old database
   // Future<void> _deleteOldDatabase() async {
   //   final databasePath = path.join(await getDatabasesPath(), 'chat_database.db');
@@ -63,8 +88,8 @@ class ChatController extends GetxController {
         isSentByUser: maps[i]['isSentByUser'] == 1,
       );
     }));
+    jumpToBottom();
     isLoading(false);
-    _scrollToBottom();
     update(); // Update the UI after loading messages
   }
 
@@ -90,7 +115,7 @@ class ChatController extends GetxController {
     // Show typing indicator
     isTyping = true;
     update(); // Refresh the UI
-    _scrollToBottom();
+    jumpToBottom();
     // Mock delay and reply
     await Future.delayed(const Duration(seconds: 2));
     final replyMessage =
@@ -115,6 +140,6 @@ class ChatController extends GetxController {
     // Hide typing indicator
     isTyping = false;
     update(); // Refresh the UI
-    _scrollToBottom();
+    jumpToBottom();
   }
 }
