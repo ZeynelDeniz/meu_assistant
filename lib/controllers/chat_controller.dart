@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
@@ -7,13 +8,31 @@ import '../models/chat_message.dart';
 class ChatController extends GetxController {
   final RxList<ChatMessage> messages = <ChatMessage>[].obs;
   late Database _database;
-  bool isTyping = false; // Declare isTyping
+  bool isTyping = false;
   final RxBool isLoading = true.obs;
+
+  final ScrollController scrollController = ScrollController();
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(
+          scrollController.position.maxScrollExtent,
+        );
+      }
+    });
+  }
 
   @override
   void onInit() {
     super.onInit();
     _initDatabase();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose(); // Dispose the ScrollController
+    super.dispose();
   }
 
   //* Uncomment this method and add to onInit to delete the old database
@@ -45,6 +64,7 @@ class ChatController extends GetxController {
       );
     }));
     isLoading(false);
+    _scrollToBottom();
     update(); // Update the UI after loading messages
   }
 
@@ -70,19 +90,31 @@ class ChatController extends GetxController {
     // Show typing indicator
     isTyping = true;
     update(); // Refresh the UI
-
+    _scrollToBottom();
     // Mock delay and reply
     await Future.delayed(const Duration(seconds: 2));
+    final replyMessage =
+        "This will be a reply from chatgpt, big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here";
+
     final replyId = await _database.insert(
       'messages',
-      ChatMessage(message: "This will be a reply from chatgpt", isSentByUser: false).toMap(),
+      ChatMessage(
+        message: replyMessage,
+        isSentByUser: false,
+      ).toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    messages.add(ChatMessage(
-        id: replyId, message: "This will be a reply from chatgpt", isSentByUser: false));
+    messages.add(
+      ChatMessage(
+        id: replyId,
+        message: replyMessage,
+        isSentByUser: false,
+      ),
+    );
 
     // Hide typing indicator
     isTyping = false;
     update(); // Refresh the UI
+    _scrollToBottom();
   }
 }

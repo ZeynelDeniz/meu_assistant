@@ -10,17 +10,20 @@ class TypingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return isTyping
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Icon(Icons.more_horiz, color: Colors.grey),
-              Text(
-                AppLocalizations.of(context)!.chatScreenTypingIndicator,
-                style: TextStyle(
-                  color: Colors.grey,
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Icon(Icons.more_horiz, color: Colors.grey),
+                Text(
+                  AppLocalizations.of(context)!.chatScreenTypingIndicator,
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           )
         : Container();
   }

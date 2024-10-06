@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
           Locale('en', ''), // English, no country code
           Locale('tr', ''), // Turkish, no country code
         ],
+        locale: settingsController.locale.value, // Use the locale from SettingsController
 
         // Use AppLocalizations to configure the correct application title
         // depending on the user's locale.

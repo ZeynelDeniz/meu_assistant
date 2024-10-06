@@ -4,9 +4,7 @@ import '../widgets/base_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({
-    super.key,
-  });
+  const HomeScreen({super.key});
 
   static const String routeName = '/';
 

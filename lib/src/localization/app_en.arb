@@ -9,5 +9,6 @@
   "chatScreenTitle": "AI Assistant",
   "chatScreenInputHint": "Enter your message",
   "chatScreenSendButton": "Send",
-  "chatScreenTypingIndicator": "Typing..."
+  "chatScreenTypingIndicator": "Typing...",
+  "language": "Language"
 }

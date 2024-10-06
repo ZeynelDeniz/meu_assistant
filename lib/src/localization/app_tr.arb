@@ -3,11 +3,12 @@
   "@appTitle": {
     "description": "Uygulama Başlığı"
   },
-  "theme": "Theme",
+  "theme": "Tema",
   "homeScreenTitle": "Ana Sayfa",
   "homeScreenBody": "Ana Sayfaya Hoşgeldiniz",
   "chatScreenTitle": "AI Asistan",
   "chatScreenInputHint": "Mesajınızı girin",
   "chatScreenSendButton": "Gönder",
-  "chatScreenTypingIndicator": "Yazıyor..."
+  "chatScreenTypingIndicator": "Yazıyor...",
+  "language": "Dil"
 }

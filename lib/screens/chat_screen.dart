@@ -6,11 +6,11 @@ import '../widgets/typing_indicator.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChatScreen extends StatelessWidget {
-  final TextEditingController _controller = TextEditingController();
+  ChatScreen({super.key});
 
   static const String routeName = '/chat';
 
-  ChatScreen({super.key});
+  final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -23,29 +23,38 @@ class ChatScreen extends StatelessWidget {
           children: [
             Expanded(
               child: GetBuilder<ChatController>(builder: (controller) {
-                return ListView.builder(
-                  itemCount: chatController.messages.length,
-                  itemBuilder: (context, index) {
-                    final message = chatController.messages[index];
-                    return ListTile(
-                      title: Align(
-                        alignment:
-                            message.isSentByUser ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: message.isSentByUser ? Colors.blue : Colors.grey,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            message.message,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
+                return chatController.isLoading.value
+                    ? Center(child: const CircularProgressIndicator.adaptive())
+                    : ListView.builder(
+                        controller: chatController.scrollController,
+                        itemCount: chatController.messages.length,
+                        itemBuilder: (context, index) {
+                          final message = chatController.messages[index];
+                          return ListTile(
+                            title: Align(
+                              alignment: message.isSentByUser
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                margin: message.isSentByUser
+                                    ? const EdgeInsets.only(left: 100)
+                                    : const EdgeInsets.only(right: 100),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: message.isSentByUser
+                                      ? Colors.blue
+                                      : const Color.fromARGB(255, 80, 80, 80),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  message.message,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
               }),
             ),
             GetBuilder<ChatController>(
