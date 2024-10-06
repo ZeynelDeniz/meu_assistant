@@ -1,6 +1,6 @@
-import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:get/get.dart';
 
 import '../src/settings/settings_controller.dart';
@@ -76,10 +76,6 @@ class AppDrawer extends StatelessWidget {
                           return Future.value();
                         },
                         height: 40,
-                        // style: const ToggleStyle(
-                        //   borderColor: Colors.blue,
-                        //   indicatorColor: Colors.blue,
-                        // ),
                         iconBuilder: (value, foreground) {
                           final themeMode = settingsController.themeMode.value;
                           final isDarkMode = themeMode == ThemeMode.dark ||

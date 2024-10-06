@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // Assuming you are using GetX for state management
-import '../controllers/chat_controller.dart'; // Import the ChatController
+import 'package:get/get.dart';
+import '../controllers/chat_controller.dart';
 import '../widgets/base_scaffold.dart';
-import '../widgets/typing_indicator.dart'; // Import the TypingIndicator widget
+import '../widgets/typing_indicator.dart';
 
 class ChatScreen extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();

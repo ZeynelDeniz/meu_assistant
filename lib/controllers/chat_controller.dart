@@ -2,21 +2,7 @@ import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 
-class ChatMessage {
-  final int? id;
-  final String message;
-  final bool isSentByUser;
-
-  ChatMessage({this.id, required this.message, required this.isSentByUser});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'message': message,
-      'isSentByUser': isSentByUser ? 1 : 0,
-    };
-  }
-}
+import '../models/chat_message.dart';
 
 class ChatController extends GetxController {
   final RxList<ChatMessage> messages = <ChatMessage>[].obs;
