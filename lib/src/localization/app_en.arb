@@ -10,5 +10,6 @@
   "chatScreenInputHint": "Enter your message",
   "chatScreenSendButton": "Send",
   "chatScreenTypingIndicator": "Typing...",
-  "language": "Language"
+  "language": "Language",
+  "mapScreenTitle": "Map"
 }

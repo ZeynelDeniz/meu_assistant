@@ -10,5 +10,6 @@
   "chatScreenInputHint": "Mesajınızı girin",
   "chatScreenSendButton": "Gönder",
   "chatScreenTypingIndicator": "Yazıyor...",
-  "language": "Dil"
+  "language": "Dil",
+  "mapScreenTitle": "Harita"
 }
