@@ -11,5 +11,6 @@
   "chatScreenSendButton": "Send",
   "chatScreenTypingIndicator": "Typing...",
   "language": "Language",
-  "mapScreenTitle": "Map"
+  "mapScreenTitle": "Map",
+  "loc_1" : "Engineering Building"
 }
