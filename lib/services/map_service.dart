@@ -1,7 +1,9 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // TODO Add University related markers
@@ -9,8 +11,15 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 //TODO When finished, add all to app_en.arb and app_tr.arb and apply here for localization
 
 class MapService {
-  static const LatLng campusCenter = LatLng(36.78605165340255, 34.52843719135306);
-  final PopupController popupController = PopupController();
+  static LatLng campusCenter = LatLng(36.786659, 34.525297);
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+
+  CameraPosition get initialCameraPosition {
+    return CameraPosition(
+      target: campusCenter,
+      zoom: 15.5,
+    );
+  }
 
   List<Map<String, dynamic>> getLocations(BuildContext context) {
     return [
@@ -22,46 +31,32 @@ class MapService {
     ];
   }
 
-  List<Marker> getMarkers(BuildContext context) {
+  Set<Marker> getMarkers(BuildContext context) {
     final locations = getLocations(context);
     return locations.map((location) {
       return Marker(
-        key: UniqueKey(),
-        width: 30,
-        height: 30,
-        point: location['position'] as LatLng,
-        child: GestureDetector(
-          onTap: () {
-            popupController.hideAllPopups();
-            popupController.togglePopup(Marker(
-              point: location['position'] as LatLng,
-              child: const SizedBox.shrink(),
-            ));
-          },
-          child: Icon(Icons.location_pin, color: Colors.blue, size: 30),
-        ),
+        markerId: MarkerId(location['name']),
+        position: location['position'] as LatLng,
+        infoWindow: InfoWindow(title: location['name']),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
       );
-    }).toList();
+    }).toSet();
+  }
+
+  void onMapCreated(GoogleMapController controller) {
+    _controller.complete(controller);
+  }
+
+  void onLongPress(LatLng position) {
+    log('${position.latitude.toStringAsFixed(6)}, ${position.longitude.toStringAsFixed(6)}');
+  }
+
+  Future<void> moveToLocation(LatLng location) async {
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newLatLng(location));
+  }
+
+  Future<String> loadMapStyle() async {
+    return await rootBundle.loadString('assets/map_style.json');
   }
 }
-// class ExamplePopup extends StatelessWidget {
-//   final Marker marker;
-
-//   const ExamplePopup(this.marker, {super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Find the location corresponding to the marker
-
-//     final location = locations.firstWhere(
-//       (loc) => loc['position'] == marker.point,
-//     );
-
-//     return Card(
-//       child: Padding(
-//         padding: const EdgeInsets.all(8.0),
-//         child: Text(location['name'] as String),
-//       ),
-//     );
-//   }
-// }

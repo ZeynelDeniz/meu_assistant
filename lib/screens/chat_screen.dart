@@ -30,6 +30,7 @@ class ChatScreen extends StatelessWidget {
                         : ListView.builder(
                             controller: chatController.scrollController,
                             itemCount: chatController.messages.length,
+                            reverse: true,
                             itemBuilder: (context, index) {
                               final message = chatController.messages[index];
                               return ListTile(

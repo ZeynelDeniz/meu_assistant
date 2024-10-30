@@ -5,8 +5,14 @@ import 'package:path/path.dart' as path;
 
 import '../models/chat_message.dart';
 
+//TODO Add Voice Recognition or NLP
+
+//TODO Add to knowledge base: Öğrenci Kayıt Süreci
+
 class ChatController extends GetxController {
-  final RxList<ChatMessage> messages = <ChatMessage>[].obs;
+  final RxList<ChatMessage> _messages = <ChatMessage>[].obs;
+  List<ChatMessage> get messages => _messages.reversed.toList();
+
   late Database _database;
   bool isTyping = false;
   final RxBool isLoading = true.obs;
@@ -14,23 +20,13 @@ class ChatController extends GetxController {
   final ScrollController scrollController = ScrollController();
   final RxBool showScrollDownButton = false.obs;
 
-  void jumpToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (scrollController.hasClients) {
-        scrollController.jumpTo(
-          scrollController.position.maxScrollExtent,
-        );
-      }
-    });
-  }
-
   void animateToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
         scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
+          scrollController.position.minScrollExtent,
           duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+          curve: Curves.easeOut,
         );
       }
     });
@@ -50,13 +46,12 @@ class ChatController extends GetxController {
   }
 
   void _scrollListener() {
-    const double threshold = 1000.0; // Adjust this value as needed
-
-    if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - threshold) {
-      // User is near the bottom
+    const threshold = 1000; // Adjust this value as needed
+    if (scrollController.position.pixels <= threshold) {
+      // User is near the top
       showScrollDownButton.value = false;
     } else {
-      // User has scrolled up more than the threshold
+      // User is not near the top
       showScrollDownButton.value = true;
     }
   }
@@ -81,14 +76,13 @@ class ChatController extends GetxController {
 
   Future<void> _loadMessages() async {
     final List<Map<String, dynamic>> maps = await _database.query('messages');
-    messages.addAll(List.generate(maps.length, (i) {
+    _messages.addAll(List.generate(maps.length, (i) {
       return ChatMessage(
         id: maps[i]['id'],
         message: maps[i]['message'],
         isSentByUser: maps[i]['isSentByUser'] == 1,
       );
     }));
-    jumpToBottom();
     isLoading(false);
     update(); // Update the UI after loading messages
   }
@@ -96,7 +90,7 @@ class ChatController extends GetxController {
   Future<void> addMessage(String message, bool isSentByUser) async {
     // Check the number of messages
     final count = Sqflite.firstIntValue(await _database.rawQuery('SELECT COUNT(*) FROM messages'));
-    if (count != null && count >= 20) {
+    if (count != null && count >= 30) {
       // Delete the oldest message
       await _database.delete(
         'messages',
@@ -110,17 +104,15 @@ class ChatController extends GetxController {
       ChatMessage(message: message, isSentByUser: isSentByUser).toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    messages.add(ChatMessage(id: id, message: message, isSentByUser: isSentByUser));
+    _messages.add(ChatMessage(id: id, message: message, isSentByUser: isSentByUser));
 
     // Show typing indicator
     isTyping = true;
     update(); // Refresh the UI
-    jumpToBottom();
     // Mock delay and reply
     await Future.delayed(const Duration(seconds: 2));
     final replyMessage =
-        "This will be a reply from chatgpt, big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here big reply test here";
-
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
     final replyId = await _database.insert(
       'messages',
       ChatMessage(
@@ -129,7 +121,7 @@ class ChatController extends GetxController {
       ).toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    messages.add(
+    _messages.add(
       ChatMessage(
         id: replyId,
         message: replyMessage,
@@ -140,6 +132,5 @@ class ChatController extends GetxController {
     // Hide typing indicator
     isTyping = false;
     update(); // Refresh the UI
-    jumpToBottom();
   }
 }

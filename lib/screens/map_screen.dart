@@ -1,18 +1,8 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../services/map_service.dart';
 import '../widgets/base_scaffold.dart';
-
-class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
-  static const String routeName = '/map';
-
-  @override
-  MapScreenState createState() => MapScreenState();
-}
 
 //TODO Add a button to toggle all markers
 
@@ -24,18 +14,24 @@ class MapScreen extends StatefulWidget {
 
 //TODO LATER: Create routing between user location and a selected marker
 
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
+  static const String routeName = '/map';
+
+  @override
+  MapScreenState createState() => MapScreenState();
+}
+
 class MapScreenState extends State<MapScreen> {
-  static final MapController _mapController = MapController();
   final MapService mapService = MapService();
-  List<Marker> markers = []; // Initialize with an empty list
+  String? mapStyle;
 
   @override
   void initState() {
     super.initState();
-    // Initialize markers in initState
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    mapService.loadMapStyle().then((style) {
       setState(() {
-        markers = mapService.getMarkers(context);
+        mapStyle = style;
       });
     });
   }
@@ -44,49 +40,13 @@ class MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return BaseScaffold(
       appBarTitle: AppLocalizations.of(context)!.mapScreenTitle,
-      body: Column(
-        children: [
-          Flexible(
-            child: FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                onTap: (_, __) => mapService.popupController.hideAllPopups(),
-                onLongPress: (tapPosition, point) {
-                  log('Pressed location: ${point.latitude.toStringAsFixed(6)}, ${point.longitude.toStringAsFixed(6)}');
-                },
-                initialCenter: MapService.campusCenter,
-                initialZoom: 15,
-                maxZoom: 20,
-                minZoom: 3,
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                ),
-                MarkerLayer(markers: markers),
-                PopupMarkerLayer(
-                  options: PopupMarkerLayerOptions(
-                    markers: markers,
-                    popupController: mapService.popupController,
-                    popupDisplayOptions: PopupDisplayOptions(
-                      builder: (BuildContext context, Marker marker) {
-                        final location = mapService.getLocations(context).firstWhere(
-                              (loc) => loc['position'] == marker.point,
-                            );
-                        return Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(location['name'] as String),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: GoogleMap(
+        onLongPress: mapService.onLongPress,
+        mapType: MapType.normal,
+        initialCameraPosition: mapService.initialCameraPosition,
+        onMapCreated: mapService.onMapCreated,
+        markers: mapService.getMarkers(context),
+        // style: mapStyle, //TODO Uncomment this line after adding all the custom markers
       ),
     );
   }
