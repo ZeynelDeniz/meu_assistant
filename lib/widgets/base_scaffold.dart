@@ -8,10 +8,12 @@ class BaseScaffold extends StatelessWidget {
     super.key,
     required this.body,
     this.appBarTitle,
+    this.fab,
   });
 
   final Widget body;
   final String? appBarTitle;
+  final Widget? fab;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,7 @@ class BaseScaffold extends StatelessWidget {
       ),
       drawer: AppDrawer(settingsController: settingsController),
       body: body,
+      floatingActionButton: fab,
     );
   }
 }

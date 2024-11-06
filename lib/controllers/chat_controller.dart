@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 
 import '../models/chat_message.dart';
 
@@ -109,8 +112,18 @@ class ChatController extends GetxController {
     // Show typing indicator
     isTyping = true;
     update(); // Refresh the UI
+
+    try {
+      // Make an HTTP request
+      final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts/1'));
+      log('Response status: ${response.statusCode}');
+      log('Response body: ${response.body}');
+    } catch (e) {
+      log('Failed to fetch data: $e');
+      // Handle the error, e.g., show a message to the user
+    }
+
     // Mock delay and reply
-    await Future.delayed(const Duration(seconds: 2));
     final replyMessage =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
     final replyId = await _database.insert(
