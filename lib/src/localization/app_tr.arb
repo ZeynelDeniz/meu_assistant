@@ -11,6 +11,7 @@
   "chatScreenSendButton": "Gönder",
   "chatScreenTypingIndicator": "Yazıyor...",
   "language": "Dil",
+  "noConnection" : "Internet bağlantınızı kontrol edin.",
   "mapScreenTitle": "Harita",
   "marker_loc_1" : "Mühendislik Binası"
 }

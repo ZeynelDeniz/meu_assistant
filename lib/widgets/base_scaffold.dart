@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../services/connectivity_service.dart';
 import '../src/settings/settings_controller.dart';
 import 'app_drawer.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BaseScaffold extends StatelessWidget {
   const BaseScaffold({
@@ -18,13 +20,37 @@ class BaseScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsController = Get.find<SettingsController>();
+    final connectivityService = Get.find<ConnectivityService>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarTitle ?? 'App'),
       ),
       drawer: AppDrawer(settingsController: settingsController),
-      body: body,
+      body: Obx(() {
+        return Column(
+          children: [
+            if (connectivityService.isConnected.value == false)
+              Container(
+                padding: const EdgeInsets.all(8),
+                width: double.infinity,
+                color: Colors.red,
+                child: Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.noConnection,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            Expanded(
+              child: body,
+            ),
+          ],
+        );
+      }),
       floatingActionButton: fab,
     );
   }

@@ -11,6 +11,7 @@
   "chatScreenSendButton": "Send",
   "chatScreenTypingIndicator": "Typing...",
   "language": "Language",
+  "noConnection": "Check your internet connection.",
   "mapScreenTitle": "Map",
   "marker_loc_1" : "Engineering Building"
 }
