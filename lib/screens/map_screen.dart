@@ -7,8 +7,6 @@ import '../widgets/base_scaffold.dart';
 
 //TODO Add a list somewhere to show all markers and their names and allow the user to click on them to center the map to that marker
 
-//TODO LATER: Add a button to show the user's location on the map
-
 //TODO LATER: Create routing between user location and a selected marker
 
 class MapScreen extends StatefulWidget {

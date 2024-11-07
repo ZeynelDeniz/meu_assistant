@@ -45,17 +45,17 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>GMSApiKey</key>
-    <string>$(GOOGLE_MAPS_API_KEY)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to show relevant information.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We need your location to show relevant information even when the app is in the background.</string>
+	<string>We need your location to ensure the app works correctly.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need your location to show relevant information at all times.</string>
+	<string>We need your location to ensure the app works correctly.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>We need your location to ensure the app works correctly.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need your location to ensure the app works correctly.</string>
 </dict>
 </plist>

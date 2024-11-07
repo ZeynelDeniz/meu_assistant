@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:io';
 import '../services/connectivity_service.dart';
 import '../src/settings/settings_controller.dart';
 import 'app_drawer.dart';
@@ -48,6 +49,10 @@ class BaseScaffold extends StatelessWidget {
             Expanded(
               child: body,
             ),
+            if (Platform.isIOS)
+              SizedBox(
+                height: MediaQuery.of(context).padding.bottom, //TODO Check later
+              ),
           ],
         );
       }),
