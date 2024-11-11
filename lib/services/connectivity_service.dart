@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:async';
 
 class ConnectivityService extends GetxController {
+  //TODO Check connection for IOS
   final _connectionStatus = [ConnectivityResult.none].obs;
   RxBool get isConnected =>
       _connectionStatus.any((status) => status != ConnectivityResult.none).obs;

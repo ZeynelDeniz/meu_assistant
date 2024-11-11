@@ -51,7 +51,7 @@ class BaseScaffold extends StatelessWidget {
             ),
             if (Platform.isIOS)
               SizedBox(
-                height: MediaQuery.of(context).padding.bottom, //TODO Check later
+                height: MediaQuery.of(context).padding.bottom,
               ),
           ],
         );

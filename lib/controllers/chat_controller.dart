@@ -10,7 +10,7 @@ import '../models/chat_message.dart';
 
 //TODO Add Voice Recognition or NLP
 
-//TODO Add to knowledge base: Öğrenci Kayıt Süreci
+//TODO DENİZ: Add to knowledge base: Öğrenci Kayıt Süreci
 
 class ChatController extends GetxController {
   final RxList<ChatMessage> _messages = <ChatMessage>[].obs;

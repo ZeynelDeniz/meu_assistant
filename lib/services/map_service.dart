@@ -25,19 +25,6 @@ class MapService {
     );
   }
 
-  List<Map<String, dynamic>> getLocations(BuildContext context) {
-    return [
-      {
-        'name': AppLocalizations.of(context)!.marker_loc_1,
-        'position': LatLng(36.784779, 34.526218)
-      },
-      {'name': 'Mühendislik Derslikleri A Blok', 'position': LatLng(36.786103, 34.525679)},
-      {'name': 'Mühendislik Derslikleri B Blok', 'position': LatLng(36.786228, 34.526015)},
-      {'name': 'Kütüphane', 'position': LatLng(36.783297, 34.527555)},
-      {'name': 'Yabancı Diller Yüksekokulu', 'position': LatLng(36.783277, 34.528045)},
-    ];
-  }
-
   Set<Marker> getMarkers(BuildContext context) {
     final locations = getLocations(context);
     _markers = locations.map((location) {
@@ -89,7 +76,6 @@ class MapService {
 
       if (status.isPermanentlyDenied) {
         log('Location permission denied forever');
-        // await openAppSettings(); //TODO Check later
         return false;
       }
 
@@ -101,5 +87,18 @@ class MapService {
       log('Location permission error: $e');
       return false;
     }
+  }
+
+  List<Map<String, dynamic>> getLocations(BuildContext context) {
+    return [
+      {
+        'name': AppLocalizations.of(context)!.marker_loc_1,
+        'position': LatLng(36.784779, 34.526218)
+      },
+      {'name': 'Mühendislik Derslikleri A Blok', 'position': LatLng(36.786103, 34.525679)},
+      {'name': 'Mühendislik Derslikleri B Blok', 'position': LatLng(36.786228, 34.526015)},
+      {'name': 'Kütüphane', 'position': LatLng(36.783297, 34.527555)},
+      {'name': 'Yabancı Diller Yüksekokulu', 'position': LatLng(36.783277, 34.528045)},
+    ];
   }
 }

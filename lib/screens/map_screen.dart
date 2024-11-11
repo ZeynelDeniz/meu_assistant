@@ -42,7 +42,7 @@ class MapScreenState extends State<MapScreen> {
       initialCameraPosition: mapService.initialCameraPosition,
       onMapCreated: mapService.onMapCreated,
       markers: mapService.getMarkers(context),
-      style: mapStyle, //TODO Uncomment this line after adding all the custom markers
+      // style: mapStyle, //TODO Uncomment this line after adding all the custom markers
     );
   }
 

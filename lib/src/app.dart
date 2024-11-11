@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:meu_assistant/screens/home_screen.dart';
 import 'package:meu_assistant/screens/map_screen.dart';
+import 'package:flutter/services.dart';
 
 import '../screens/chat_screen.dart';
 import 'settings/settings_controller.dart';
@@ -17,6 +18,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsController = Get.find<SettingsController>();
+
+    // Force portrait mode
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
     return Obx(() {
       return GetMaterialApp(
