@@ -5,18 +5,34 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:location/location.dart';
+import 'package:get/get.dart';
 
-// TODO Add University related markers
+import 'package:meu_assistant/constants/api_info.dart';
 
-//TODO When finished, add all to app_en.arb and app_tr.arb and apply here for localization
+// TODO DENİZ Add University related markers
 
-class MapService {
-  final _campusCenter = LatLng(36.786659, 34.525297);
+//TODO DENİZ When finished, add all to app_en.arb and app_tr.arb and apply here for localization
+
+//TODO When a route is created, make other markers invisible
+
+//TODO When a route is created, add a button to clear the route
+
+//TODO Add University ring routes
+
+class MapService extends GetxController {
   final _controller = Completer<GoogleMapController>();
-  bool _markersVisible = true;
-  bool get markersVisible => _markersVisible;
+  final _campusCenter = LatLng(36.786659, 34.525297);
   LatLng get campusCenter => _campusCenter;
+  final _markersVisible = true.obs;
+  bool get markersVisible => _markersVisible.value;
   Set<Marker> _markers = {};
+  Function(LatLng)? onMarkerTapped;
+  List<LatLng> _routePoints = [];
+  List<LatLng> get routePoints => _routePoints;
+  final lastSelectedMarker = Rx<LatLng?>(null);
+  var isRouteLoading = false.obs;
 
   CameraPosition get initialCameraPosition {
     return CameraPosition(
@@ -33,16 +49,22 @@ class MapService {
         position: location['position'] as LatLng,
         infoWindow: InfoWindow(title: location['name']),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        visible: _markersVisible,
+        visible: _markersVisible.value,
+        onTap: () {
+          lastSelectedMarker.value = location['position'] as LatLng;
+          if (onMarkerTapped != null) {
+            onMarkerTapped!(lastSelectedMarker.value!);
+          }
+        },
       );
     }).toSet();
     return _markers;
   }
 
   void toggleMarkers() {
-    _markersVisible = !_markersVisible;
+    _markersVisible.value = !_markersVisible.value;
     _markers = _markers.map((marker) {
-      return marker.copyWith(visibleParam: _markersVisible);
+      return marker.copyWith(visibleParam: _markersVisible.value);
     }).toSet();
   }
 
@@ -100,5 +122,55 @@ class MapService {
       {'name': 'Kütüphane', 'position': LatLng(36.783297, 34.527555)},
       {'name': 'Yabancı Diller Yüksekokulu', 'position': LatLng(36.783277, 34.528045)},
     ];
+  }
+
+  Future<void> getRoute(LatLng start, LatLng end) async {
+    isRouteLoading.value = true;
+    PolylinePoints polylinePoints = PolylinePoints();
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      googleApiKey: googleMapsApiKey,
+      request: PolylineRequest(
+        origin: PointLatLng(start.latitude, start.longitude),
+        destination: PointLatLng(end.latitude, end.longitude),
+        mode: TravelMode.walking,
+      ),
+    );
+
+    if (result.points.isNotEmpty) {
+      _routePoints = result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+    }
+    isRouteLoading.value = false;
+  }
+
+  Future<LatLng?> getUserLocation() async {
+    try {
+      Location location = Location();
+      bool serviceEnabled = await location.serviceEnabled();
+      if (!serviceEnabled) {
+        serviceEnabled = await location.requestService();
+        if (!serviceEnabled) {
+          log('Location service is disabled.');
+          return null;
+        }
+      }
+
+      var status = await Permission.locationWhenInUse.status;
+      if (status.isDenied) {
+        return null;
+      }
+
+      LocationData locationData = await location.getLocation();
+      return LatLng(locationData.latitude!, locationData.longitude!);
+    } on PlatformException catch (e) {
+      log('Location error: $e');
+      return null;
+    } catch (e) {
+      log('Location error: $e');
+      return null;
+    }
+  }
+
+  void clearLastSelectedMarker() {
+    lastSelectedMarker.value = null;
   }
 }
