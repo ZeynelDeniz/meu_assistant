@@ -10,13 +10,17 @@
   "chatScreenInputHint": "Mesajınızı girin",
   "chatScreenSendButton": "Gönder",
   "chatScreenTypingIndicator": "Yazıyor...",
-  "language": "Dil",
-  "noConnection" : "Internet bağlantınızı kontrol edin.",
-  "mapScreenTitle": "Harita",
-  "marker_loc_1" : "Mühendislik Binası",
   "question1": "Kütüphane nerede?",
   "question2": "Kafeterya saatleri nedir?",
   "question3": "Kampüs Wi-Fi'ına nasıl erişebilirim?",
   "question4": "Öğrenci hizmetleri ofisini nerede bulabilirim?",
-  "question5": "Spor salonu saatleri nedir?"
+  "question5": "Spor salonu saatleri nedir?",
+  "language": "Dil",
+  "noConnection" : "Internet bağlantınızı kontrol edin.",
+  "mapScreenTitle": "Harita",
+  "loc_1" : "Mühendislik Binası",
+  "loc_2": "Mühendislik Derslikleri A Blok",
+  "loc_3": "Mühendislik Derslikleri B Blok",
+  "loc_4": "Kütüphane",
+  "loc_5": "Yabancı Diller Yüksekokulu"
 }

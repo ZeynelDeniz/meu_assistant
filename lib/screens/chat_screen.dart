@@ -135,7 +135,7 @@ class ChatScreen extends StatelessWidget {
               ],
             ),
             Positioned(
-              bottom: 80,
+              bottom: 130,
               right: 16,
               child: chatController.showScrollDownButton.value
                   ? FadeTransition(

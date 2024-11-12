@@ -11,8 +11,6 @@ import '../widgets/base_scaffold.dart';
 
 //TODO Add a list somewhere to show all markers and their names and allow the user to click on them to center the map to that marker
 
-//TODO LATER: Create routing between user location and a selected marker
-
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
   static const String routeName = '/map';
@@ -80,7 +78,8 @@ class MapScreenState extends State<MapScreen> {
         ));
       });
     } else {
-      // Handle the case where user location is not available
+      // Handle the case where user location is not available,
+      return;
     }
   }
 

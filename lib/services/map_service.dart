@@ -19,7 +19,7 @@ import 'package:meu_assistant/constants/api_info.dart';
 
 //TODO When a route is created, add a button to clear the route
 
-//TODO Add University ring routes
+//TODO DENİZ Find University ring routes
 
 class MapService extends GetxController {
   final _controller = Completer<GoogleMapController>();
@@ -111,19 +111,6 @@ class MapService extends GetxController {
     }
   }
 
-  List<Map<String, dynamic>> getLocations(BuildContext context) {
-    return [
-      {
-        'name': AppLocalizations.of(context)!.marker_loc_1,
-        'position': LatLng(36.784779, 34.526218)
-      },
-      {'name': 'Mühendislik Derslikleri A Blok', 'position': LatLng(36.786103, 34.525679)},
-      {'name': 'Mühendislik Derslikleri B Blok', 'position': LatLng(36.786228, 34.526015)},
-      {'name': 'Kütüphane', 'position': LatLng(36.783297, 34.527555)},
-      {'name': 'Yabancı Diller Yüksekokulu', 'position': LatLng(36.783277, 34.528045)},
-    ];
-  }
-
   Future<void> getRoute(LatLng start, LatLng end) async {
     isRouteLoading.value = true;
     PolylinePoints polylinePoints = PolylinePoints();
@@ -172,5 +159,15 @@ class MapService extends GetxController {
 
   void clearLastSelectedMarker() {
     lastSelectedMarker.value = null;
+  }
+
+  List<Map<String, dynamic>> getLocations(BuildContext context) {
+    return [
+      {'name': AppLocalizations.of(context)!.loc_1, 'position': LatLng(36.784779, 34.526218)},
+      {'name': AppLocalizations.of(context)!.loc_2, 'position': LatLng(36.786103, 34.525679)},
+      {'name': AppLocalizations.of(context)!.loc_3, 'position': LatLng(36.786228, 34.526015)},
+      {'name': AppLocalizations.of(context)!.loc_4, 'position': LatLng(36.783297, 34.527555)},
+      {'name': AppLocalizations.of(context)!.loc_5, 'position': LatLng(36.783277, 34.528045)},
+    ];
   }
 }

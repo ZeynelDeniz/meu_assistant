@@ -27,6 +27,7 @@ class ChatController extends GetxController {
   final ScrollController scrollController = ScrollController();
   final RxBool showScrollDownButton = false.obs;
 
+  //TODO DENİZ Soruları düzenle. app_tr ve app_en'de
   List<String> get sampleQuestions => [
         AppLocalizations.of(Get.context!)!.question1,
         AppLocalizations.of(Get.context!)!.question2,

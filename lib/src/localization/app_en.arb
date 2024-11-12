@@ -10,13 +10,17 @@
   "chatScreenInputHint": "Enter your message",
   "chatScreenSendButton": "Send",
   "chatScreenTypingIndicator": "Typing...",
-  "language": "Language",
-  "noConnection": "Check your internet connection.",
-  "mapScreenTitle": "Map",
-  "marker_loc_1" : "Engineering Building",
   "question1": "Where is the library located?",
   "question2": "What are the cafeteria hours?",
   "question3": "How can I access the campus Wi-Fi?",
   "question4": "Where can I find the student services office?",
-  "question5": "What are the gym hours?"
+  "question5": "What are the gym hours?",
+  "language": "Language",
+  "noConnection": "Check your internet connection.",
+  "mapScreenTitle": "Map",
+  "loc_1" : "Engineering Building",
+  "loc_2": "Engineering Classrooms Block A",
+  "loc_3": "Engineering Classrooms Block B",
+  "loc_4": "Library",
+  "loc_5": "School of Foreign Languages"
 }
