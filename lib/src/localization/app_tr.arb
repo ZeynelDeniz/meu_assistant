@@ -13,5 +13,10 @@
   "language": "Dil",
   "noConnection" : "Internet bağlantınızı kontrol edin.",
   "mapScreenTitle": "Harita",
-  "marker_loc_1" : "Mühendislik Binası"
+  "marker_loc_1" : "Mühendislik Binası",
+  "question1": "Kütüphane nerede?",
+  "question2": "Kafeterya saatleri nedir?",
+  "question3": "Kampüs Wi-Fi'ına nasıl erişebilirim?",
+  "question4": "Öğrenci hizmetleri ofisini nerede bulabilirim?",
+  "question5": "Spor salonu saatleri nedir?"
 }

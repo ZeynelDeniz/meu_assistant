@@ -6,11 +6,15 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import '../models/chat_message.dart';
 
 //TODO Add Voice Recognition or NLP
 
 //TODO DENİZ: Add to knowledge base: Öğrenci Kayıt Süreci
+
+//TODO When sending a message, add info about the user. Ex: App language
 
 class ChatController extends GetxController {
   final RxList<ChatMessage> _messages = <ChatMessage>[].obs;
@@ -22,6 +26,14 @@ class ChatController extends GetxController {
 
   final ScrollController scrollController = ScrollController();
   final RxBool showScrollDownButton = false.obs;
+
+  List<String> get sampleQuestions => [
+        AppLocalizations.of(Get.context!)!.question1,
+        AppLocalizations.of(Get.context!)!.question2,
+        AppLocalizations.of(Get.context!)!.question3,
+        AppLocalizations.of(Get.context!)!.question4,
+        AppLocalizations.of(Get.context!)!.question5,
+      ];
 
   void animateToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {

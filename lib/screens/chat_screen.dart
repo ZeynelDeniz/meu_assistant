@@ -11,6 +11,7 @@ class ChatScreen extends StatelessWidget {
   static const String routeName = '/chat';
 
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +65,43 @@ class ChatScreen extends StatelessWidget {
                   builder: (controller) {
                     return TypingIndicator(isTyping: controller.isTyping);
                   },
+                ),
+                SizedBox(
+                  height: 50,
+                  child: Scrollbar(
+                    controller: _scrollController,
+                    interactive: true,
+                    thumbVisibility: true,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: chatController.sampleQuestions.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: chatController.isLoading.value
+                              ? null
+                              : () {
+                                  final message = chatController.sampleQuestions[index];
+                                  chatController.addMessage(message, true);
+                                },
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[700],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Text(
+                                chatController.sampleQuestions[index],
+                                style: const TextStyle(color: Color.fromARGB(255, 230, 230, 230)),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),

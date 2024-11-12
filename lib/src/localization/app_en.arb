@@ -13,5 +13,10 @@
   "language": "Language",
   "noConnection": "Check your internet connection.",
   "mapScreenTitle": "Map",
-  "marker_loc_1" : "Engineering Building"
+  "marker_loc_1" : "Engineering Building",
+  "question1": "Where is the library located?",
+  "question2": "What are the cafeteria hours?",
+  "question3": "How can I access the campus Wi-Fi?",
+  "question4": "Where can I find the student services office?",
+  "question5": "What are the gym hours?"
 }
