@@ -20,20 +20,27 @@ class ChatScreen extends StatelessWidget {
     return BaseScaffold(
       appBarTitle: AppLocalizations.of(context)!.chatScreenTitle,
       body: Obx(() {
-        return Stack(
+        return Column(
           children: [
-            Column(
-              children: [
-                Expanded(
-                  child: GetBuilder<ChatController>(builder: (controller) {
+            Expanded(
+              child: Stack(
+                children: [
+                  GetBuilder<ChatController>(builder: (controller) {
                     return chatController.isLoading.value
                         ? Center(child: const CircularProgressIndicator.adaptive())
                         : ListView.builder(
                             controller: chatController.scrollController,
-                            itemCount: chatController.messages.length,
+                            itemCount: chatController.messages.length + 1,
                             reverse: true,
                             itemBuilder: (context, index) {
-                              final message = chatController.messages[index];
+                              if (index == 0) {
+                                //TODO Set a different sized box for IOS.
+                                return SizedBox(
+                                  height:
+                                      Theme.of(context).platform == TargetPlatform.iOS ? 22 : 56,
+                                );
+                              }
+                              final message = chatController.messages[index - 1];
                               return ListTile(
                                 title: Align(
                                   alignment: message.isSentByUser
@@ -60,92 +67,109 @@ class ChatScreen extends StatelessWidget {
                             },
                           );
                   }),
-                ),
-                GetBuilder<ChatController>(
-                  builder: (controller) {
-                    return TypingIndicator(isTyping: controller.isTyping);
-                  },
-                ),
-                SizedBox(
-                  height: 50,
-                  child: Scrollbar(
-                    controller: _scrollController,
-                    interactive: true,
-                    thumbVisibility: true,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: chatController.sampleQuestions.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: chatController.isLoading.value
-                              ? null
-                              : () {
-                                  final message = chatController.sampleQuestions[index];
-                                  chatController.addMessage(message, true);
-                                },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 8.0, left: 8.0, bottom: 8.0),
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[700],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Center(
-                              child: Text(
-                                chatController.sampleQuestions[index],
-                                style: const TextStyle(color: Color.fromARGB(255, 230, 230, 230)),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                  GetBuilder<ChatController>(
+                    builder: (controller) {
+                      return TypingIndicator(isTyping: controller.isTyping);
+                    },
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          enabled: !chatController.isLoading.value,
-                          controller: _controller,
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(context)!.chatScreenInputHint,
-                            border: OutlineInputBorder(),
-                          ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: SizedBox(
+                      height: 60,
+                      child: RawScrollbar(
+                        scrollbarOrientation: ScrollbarOrientation.top,
+                        controller: _scrollController,
+                        interactive: false,
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: chatController.sampleQuestions.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: chatController.isLoading.value
+                                  ? null
+                                  : () {
+                                      final message = chatController.sampleQuestions[index];
+                                      chatController.addMessage(message, true);
+                                    },
+                              child: Container(
+                                margin: EdgeInsets.only(
+                                  right: 8.0,
+                                  left: 8.0,
+                                  bottom: 8.0,
+                                  top: 8.0,
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[700],
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    chatController.sampleQuestions[index],
+                                    style:
+                                        const TextStyle(color: Color.fromARGB(255, 230, 230, 230)),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: chatController.isLoading.value
-                            ? null
-                            : () {
-                                final message = _controller.text;
-                                if (message.isNotEmpty) {
-                                  chatController.addMessage(message, true);
-                                  _controller.clear();
-                                }
-                              },
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 70,
+                    right: 16,
+                    child: chatController.showScrollDownButton.value
+                        ? FadeTransition(
+                            opacity: AlwaysStoppedAnimation(1.0),
+                            child: FloatingActionButton(
+                              onPressed: chatController.animateToBottom,
+                              child: const Icon(Icons.arrow_downward),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
             ),
-            Positioned(
-              bottom: 130,
-              right: 16,
-              child: chatController.showScrollDownButton.value
-                  ? FadeTransition(
-                      opacity: AlwaysStoppedAnimation(1.0),
-                      child: FloatingActionButton(
-                        onPressed: chatController.animateToBottom,
-                        child: const Icon(Icons.arrow_downward),
+            Padding(
+              padding: const EdgeInsets.only(
+                right: 8.0,
+                left: 8.0,
+                bottom: 8.0,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      enabled: !chatController.isLoading.value,
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.chatScreenInputHint,
+                        border: OutlineInputBorder(),
                       ),
-                    )
-                  : const SizedBox.shrink(),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: chatController.isLoading.value
+                        ? null
+                        : () {
+                            final message = _controller.text;
+                            if (message.isNotEmpty) {
+                              chatController.addMessage(message, true);
+                              _controller.clear();
+                            }
+                          },
+                  ),
+                ],
+              ),
             ),
           ],
         );

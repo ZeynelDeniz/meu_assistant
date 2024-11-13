@@ -127,6 +127,8 @@ class ChatController extends GetxController {
     update(); // Refresh the UI
 
     try {
+      //TODO Remove later, dummy delay
+      await Future.delayed(Duration(seconds: 1));
       // Make an HTTP request
       final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts/1'));
       log('Response status: ${response.statusCode}');
