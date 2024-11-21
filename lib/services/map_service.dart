@@ -10,6 +10,7 @@ import 'package:location/location.dart';
 import 'package:get/get.dart';
 
 import 'package:meu_assistant/constants/api_info.dart';
+import 'package:meu_assistant/models/map_location.dart';
 
 // TODO DENİZ Add University related markers
 
@@ -45,13 +46,13 @@ class MapService extends GetxController {
     final locations = getLocations(context);
     _markers = locations.map((location) {
       return Marker(
-        markerId: MarkerId(location['name']),
-        position: location['position'] as LatLng,
-        infoWindow: InfoWindow(title: location['name']),
+        markerId: MarkerId(location.name),
+        position: location.position,
+        infoWindow: InfoWindow(title: location.name),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
         visible: _markersVisible.value,
         onTap: () {
-          lastSelectedMarker.value = location['position'] as LatLng;
+          lastSelectedMarker.value = location.position;
           if (onMarkerTapped != null) {
             onMarkerTapped!(lastSelectedMarker.value!);
           }
@@ -113,20 +114,28 @@ class MapService extends GetxController {
 
   Future<void> getRoute(LatLng start, LatLng end) async {
     isRouteLoading.value = true;
-    PolylinePoints polylinePoints = PolylinePoints();
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleMapsApiKey,
-      request: PolylineRequest(
-        origin: PointLatLng(start.latitude, start.longitude),
-        destination: PointLatLng(end.latitude, end.longitude),
-        mode: TravelMode.walking,
-      ),
-    );
+    try {
+      PolylinePoints polylinePoints = PolylinePoints();
+      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+        googleApiKey: googleMapsApiKey,
+        request: PolylineRequest(
+          origin: PointLatLng(start.latitude, start.longitude),
+          destination: PointLatLng(end.latitude, end.longitude),
+          mode: TravelMode.walking,
+        ),
+      );
 
-    if (result.points.isNotEmpty) {
-      _routePoints = result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+      if (result.points.isNotEmpty) {
+        _routePoints =
+            result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+      } else {
+        log('No route points found');
+      }
+    } catch (e) {
+      log('Error getting route: $e');
+    } finally {
+      isRouteLoading.value = false;
     }
-    isRouteLoading.value = false;
   }
 
   Future<LatLng?> getUserLocation() async {
@@ -161,13 +170,28 @@ class MapService extends GetxController {
     lastSelectedMarker.value = null;
   }
 
-  List<Map<String, dynamic>> getLocations(BuildContext context) {
+  List<MapLocation> getLocations(BuildContext context) {
     return [
-      {'name': AppLocalizations.of(context)!.loc_1, 'position': LatLng(36.784779, 34.526218)},
-      {'name': AppLocalizations.of(context)!.loc_2, 'position': LatLng(36.786103, 34.525679)},
-      {'name': AppLocalizations.of(context)!.loc_3, 'position': LatLng(36.786228, 34.526015)},
-      {'name': AppLocalizations.of(context)!.loc_4, 'position': LatLng(36.783297, 34.527555)},
-      {'name': AppLocalizations.of(context)!.loc_5, 'position': LatLng(36.783277, 34.528045)},
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_1,
+        position: LatLng(36.784779, 34.526218),
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_2,
+        position: LatLng(36.786103, 34.525679),
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_3,
+        position: LatLng(36.786228, 34.526015),
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_4,
+        position: LatLng(36.783297, 34.527555),
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_5,
+        position: LatLng(36.783277, 34.528045),
+      ),
     ];
   }
 }
