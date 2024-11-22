@@ -126,8 +126,9 @@ class MapService extends GetxController {
       );
 
       if (result.points.isNotEmpty) {
-        _routePoints =
-            result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+        _routePoints = result.points
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList();
       } else {
         log('No route points found');
       }
@@ -170,27 +171,115 @@ class MapService extends GetxController {
     lastSelectedMarker.value = null;
   }
 
+//TODO Some names are not displayed fully, Needs to be fixed
   List<MapLocation> getLocations(BuildContext context) {
     return [
       MapLocation(
-        name: AppLocalizations.of(context)!.loc_1,
-        position: LatLng(36.784779, 34.526218),
-      ),
+          name: AppLocalizations.of(context)!.loc_1,
+          position: LatLng(36.785369, 34.526026),
+          email: "muhendislik@mersin.edu.tr",
+          phones: ["324 361 00 33", "324 361 00 01"]),
       MapLocation(
         name: AppLocalizations.of(context)!.loc_2,
         position: LatLng(36.786103, 34.525679),
+        //no email and phone
       ),
       MapLocation(
         name: AppLocalizations.of(context)!.loc_3,
         position: LatLng(36.786228, 34.526015),
+        //no email and phone
       ),
       MapLocation(
         name: AppLocalizations.of(context)!.loc_4,
         position: LatLng(36.783297, 34.527555),
+        phones: ["324 361 0018", "324 361 00 01", "324 361 00 17"],
       ),
       MapLocation(
         name: AppLocalizations.of(context)!.loc_5,
         position: LatLng(36.783277, 34.528045),
+        email: "ydilleryo@mersin.edu.tr",
+        phones: ["324 361 00 38", "324 361 00 01", "324 361 02 43"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_6,
+        position: LatLng(36.782376, 34.528113),
+        email: "teknikbilimler@mersin.edu.tr",
+        phones: ["324 361 00 38", "324 361 00 01", "324 361 00 43"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_7,
+        position: LatLng(36.783463, 34.528003),
+        email: "",
+        phones: ["324 361 00 01", "324 361 03 43"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_8,
+        position: LatLng(36.783488, 34.528069),
+        email: "",
+        phones: ["324 361 00 01"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_9,
+        position: LatLng(36.783584, 34.526420),
+        email: "meuoidb@mersin.edu.tr",
+        phones: ["324 361 06 48", "324 361 01 00 "],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_10,
+        position: LatLng(36.783482, 34.526383),
+        email: "bidb@mersin.edu.tr",
+        phones: ["324 361 00 01", "324 361 06 24", "324 361 04 79"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_11,
+        position: LatLng(36.784709, 34.526651),
+        email: "iktisat@mersin.edu.tr",
+        phones: ["324 361 00 01", "324 361 00 56"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_12,
+        position: LatLng(36.784931, 34.527243),
+        email: "konservatuvar@mersin.edu.tr",
+        phones: ["324 361 00 01", "324 361 00 29"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_13,
+        position: LatLng(36.786228, 34.525563),
+        email: "basin@mersin.edu.tr",
+        phones: ["324 361 00 01", "324 361 00 64", "324 361 00 63"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_14,
+        position: LatLng(36.785967, 34.525493),
+        email: "baum@mersin.edu.tr",
+        phones: ["324 361 00 01"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_15,
+        position: LatLng(36.786951, 34.525335),
+        //no email and phone
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_16,
+        position: LatLng(36.786666, 34.524407),
+        //no email and phone
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_17,
+        position: LatLng(36.787275, 34.526067),
+        //no email and phone
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_18,
+        position: LatLng(36.788089, 34.523792),
+        email: "saglikyo@mersin.edu.tr",
+        phones: ["324 361 00 01", "324 361 05 81", "324 361 05 71"],
+      ),
+      MapLocation(
+        name: AppLocalizations.of(context)!.loc_19,
+        position: LatLng(36.788243, 34.524717),
+        email: "insanvetoplum@mersin.edu.tr",
+        phones: ["324 361 00 01"],
       ),
     ];
   }
