@@ -110,7 +110,9 @@ class MapScreenState extends State<MapScreen> {
           children: [
             ActionButton(
               icon: Icon(
-                mapService.markersVisible ? Icons.location_pin : Icons.location_off,
+                mapService.markersVisible
+                    ? Icons.location_pin
+                    : Icons.location_off,
               ),
               onPressed: () {
                 mapService.toggleMarkers();
@@ -130,10 +132,10 @@ class MapScreenState extends State<MapScreen> {
                       child: SimplerCustomLoader(),
                     )
                   : Icon(Icons.directions),
-              onPressed:
-                  mapService.isRouteLoading.value || mapService.lastSelectedMarker.value == null
-                      ? null
-                      : _createRoute,
+              onPressed: mapService.isRouteLoading.value ||
+                      mapService.lastSelectedMarker.value == null
+                  ? null
+                  : _createRoute,
             ),
           ],
         ),
