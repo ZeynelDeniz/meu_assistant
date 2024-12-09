@@ -84,6 +84,12 @@ class MapService extends GetxController {
     }
   }
 
+  Future<void> selectPin(MapLocation location) async {
+    lastSelectedMarker.value = location.position;
+    final GoogleMapController controller = await _controller.future;
+    controller.showMarkerInfoWindow(MarkerId(location.name));
+  }
+
   Future<String> loadMapStyle() async {
     return await rootBundle.loadString('assets/map_style.json');
   }

@@ -3,14 +3,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:meu_assistant/widgets/custom_expandable_fab.dart';
-import 'package:meu_assistant/widgets/simpler_custom_loading.dart';
+import 'package:meu_assistant/widgets/even_simpler_custom_loading.dart';
 import 'package:get/get.dart';
 import '../models/map_location.dart';
 import '../services/map_service.dart';
 import '../widgets/base_scaffold.dart';
-
-//TODO Add a list somewhere to show all markers and their names and allow the user to click on them to center the map to that marker
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -61,7 +58,8 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
     setState(() {
       _searchResults = mapService.getLocations(context).where((location) {
         return location.name.toLowerCase().contains(value.toLowerCase());
-      }).toList();
+      }).toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
     });
   }
 
@@ -73,16 +71,154 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
         _searchResults.clear();
       } else {
         _animationController.forward();
-        _searchResults = mapService.getLocations(context);
+        _searchResults = mapService.getLocations(context)..sort((a, b) => a.name.compareTo(b.name));
       }
       _isSearching = !_isSearching;
     });
   }
 
+  Future<void> _createRoute() async {
+    try {
+      if (mapService.lastSelectedMarker.value == null) {
+        // Handle the case where no marker is selected
+        return;
+      }
+
+      LatLng? userLocation = await mapService.getUserLocation();
+      if (userLocation != null) {
+        LatLng targetLocation = mapService.lastSelectedMarker.value!;
+        await mapService.getRoute(userLocation, targetLocation);
+        setState(() {
+          _polylines.add(Polyline(
+            polylineId: PolylineId('route'),
+            points: mapService.routePoints,
+            color: Colors.blue,
+            width: 5,
+          ));
+        });
+        await mapService.setCameraToRoute(); // Set camera to fit the route
+      } else {
+        // Handle the case where user location is not available
+        return;
+      }
+    } catch (e) {
+      log('Error creating route: $e');
+      // Handle the error appropriately
+    }
+  }
+
+  void _clearRoute() {
+    setState(() {
+      _polylines.clear();
+      mapService.clearRoute();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BaseScaffold(
+      appBarTitle: _isSearching ? null : AppLocalizations.of(context)!.mapScreenTitle,
+      appBarActions: [
+        if (_isSearching) _buildSearchInput(),
+        IconButton(
+          icon: Icon(_isSearching ? Icons.close : Icons.search),
+          onPressed: _toggleSearchMode,
+        ),
+      ],
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                  child: FutureBuilder<bool>(
+                future: _locationPermissionFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _buildLoading();
+                  } else if (snapshot.hasError || !snapshot.hasData) {
+                    return _buildMap(false);
+                  } else {
+                    return _buildMap(snapshot.data!);
+                  }
+                },
+              )),
+            ],
+          ),
+          _buildSearchSheet(),
+          Obx(() => _buildMapButtons()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMapButtons() {
+    return Positioned(
+      bottom: 16,
+      left: 16,
+      child: Column(
+        children: [
+          FloatingActionButton(
+            heroTag: 'createOrClearRoute',
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            onPressed: mapService.isRouteLoading.value
+                ? null
+                : () {
+                    if (_polylines.isEmpty) {
+                      _createRoute();
+                    } else {
+                      _clearRoute();
+                    }
+                  },
+            child: mapService.isRouteLoading.value
+                ? SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: EvenSimplerCustomLoader(
+                      color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.blue,
+                    ),
+                  )
+                : Icon(
+                    _polylines.isEmpty ? Icons.directions : Icons.clear,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+          ),
+          SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: 'toggleMarkers',
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            child: Icon(
+              mapService.markersVisible ? Icons.location_pin : Icons.location_off,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+            onPressed: () {
+              mapService.toggleMarkers();
+            },
+          ),
+          SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: 'moveToLocation',
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            child: Icon(
+              Icons.home,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+            onPressed: () {
+              mapService.moveToLocation(mapService.campusCenter, zoom: 15.5);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return Center(child: CircularProgressIndicator());
+  }
+
   Widget _buildSearchInput() {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.only(left: 56.0, right: 8.0), // Adjust padding for drawer action
+        padding: const EdgeInsets.only(left: 56.0, right: 8.0, top: 4, bottom: 4),
         child: TextField(
           controller: _searchController,
           decoration: InputDecoration(
@@ -127,14 +263,18 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
                       ),
                       trailing: IconButton(
                         icon: Icon(
-                          Icons.pin_drop,
+                          Icons.directions,
                         ),
-                        onPressed: () {
-                          // TODO: Implement the click functionality to target the pin
+                        onPressed: () async {
+                          mapService.selectPin(_searchResults[index]);
+                          _toggleSearchMode();
+
+                          await _createRoute();
                         },
                       ),
                       onTap: () {
-                        // TODO: Implement the click functionality to target the pin
+                        mapService.selectPin(_searchResults[index]);
+                        mapService.moveToLocation(_searchResults[index].position, zoom: 17);
                       },
                     );
                   },
@@ -156,129 +296,13 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
           mapService.clearLastSelectedMarker();
         },
         mapType: MapType.normal,
+        buildingsEnabled: false,
         initialCameraPosition: mapService.initialCameraPosition,
         onMapCreated: mapService.onMapCreated,
         markers: mapService.getMarkers(context),
         polylines: _polylines,
         mapToolbarEnabled: false,
-        style: mapStyle, //TODO Uncomment this line after adding all the custom markers
-      ),
-    );
-  }
-
-  void _createRoute() async {
-    try {
-      if (mapService.lastSelectedMarker.value == null) {
-        // Handle the case where no marker is selected
-        return;
-      }
-
-      LatLng? userLocation = await mapService.getUserLocation();
-      if (userLocation != null) {
-        LatLng targetLocation = mapService.lastSelectedMarker.value!;
-        await mapService.getRoute(userLocation, targetLocation);
-        setState(() {
-          _polylines.add(Polyline(
-            polylineId: PolylineId('route'),
-            points: mapService.routePoints,
-            color: Colors.blue,
-            width: 5,
-          ));
-        });
-        await mapService.setCameraToRoute(); // Set camera to fit the route
-      } else {
-        // Handle the case where user location is not available
-        return;
-      }
-    } catch (e) {
-      log('Error creating route: $e');
-      // Handle the error appropriately
-    }
-  }
-
-  void _clearRoute() {
-    setState(() {
-      _polylines.clear();
-      mapService.clearRoute();
-    });
-  }
-
-  Widget _buildLoading() {
-    return Center(child: CircularProgressIndicator());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BaseScaffold(
-      appBarTitle: _isSearching ? null : AppLocalizations.of(context)!.mapScreenTitle,
-      appBarActions: [
-        if (_isSearching) _buildSearchInput(),
-        IconButton(
-          icon: Icon(_isSearching ? Icons.close : Icons.search),
-          onPressed: _toggleSearchMode,
-        ),
-      ],
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Expanded(
-                  child: FutureBuilder<bool>(
-                future: _locationPermissionFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return _buildLoading();
-                  } else if (snapshot.hasError || !snapshot.hasData) {
-                    return _buildMap(false);
-                  } else {
-                    return _buildMap(snapshot.data!);
-                  }
-                },
-              )),
-            ],
-          ),
-          _buildSearchSheet(),
-        ],
-      ),
-      fab: Obx(
-        () => CustomExpandableFab(
-          distance: 75,
-          secondaryDistance: 50,
-          children: [
-            ActionButton(
-              icon: Icon(
-                mapService.markersVisible ? Icons.location_pin : Icons.location_off,
-              ),
-              onPressed: () {
-                mapService.toggleMarkers();
-              },
-            ),
-            ActionButton(
-              icon: Icon(Icons.home),
-              onPressed: () {
-                mapService.moveToLocation(mapService.campusCenter, zoom: 15.5);
-              },
-            ),
-            ActionButton(
-              icon: mapService.isRouteLoading.value
-                  ? SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: SimplerCustomLoader(),
-                    )
-                  : Icon(_polylines.isEmpty ? Icons.directions : Icons.clear),
-              onPressed: mapService.isRouteLoading.value
-                  ? null
-                  : () {
-                      if (_polylines.isEmpty) {
-                        _createRoute();
-                      } else {
-                        _clearRoute();
-                      }
-                    },
-            ),
-          ],
-        ),
+        style: mapStyle,
       ),
     );
   }
