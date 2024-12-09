@@ -25,7 +25,10 @@ class ChatController extends GetxController {
   final ScrollController scrollController = ScrollController();
   final RxBool showScrollDownButton = false.obs;
 
+  late String _conversationId;
+
   List<String> get sampleQuestions => [
+        //TODO Change static questions to dynamic, randomize.
         AppLocalizations.of(Get.context!)!.question1,
         AppLocalizations.of(Get.context!)!.question2,
         AppLocalizations.of(Get.context!)!.question3,
@@ -48,6 +51,7 @@ class ChatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // _deleteOldDatabase();
     _initDatabase();
     scrollController.addListener(_scrollListener);
   }
@@ -61,13 +65,14 @@ class ChatController extends GetxController {
   void _scrollListener() {
     const threshold = 1000; // Adjust this value as needed
     if (scrollController.position.pixels <= threshold) {
-      // User is near the top
+      // User is not near the top
       showScrollDownButton.value = false;
     } else {
-      // User is not near the top
+      // User is near the top
       showScrollDownButton.value = true;
     }
   }
+
   //* Uncomment this method and add to onInit to delete the old database
   // Future<void> _deleteOldDatabase() async {
   //   final databasePath = path.join(await getDatabasesPath(), 'chat_database.db');
@@ -77,14 +82,36 @@ class ChatController extends GetxController {
   Future<void> _initDatabase() async {
     _database = await openDatabase(
       path.join(await getDatabasesPath(), 'chat_database.db'),
-      onCreate: (db, version) {
-        return db.execute(
+      onCreate: (db, version) async {
+        await db.execute(
           'CREATE TABLE messages(id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT, isSentByUser INTEGER)',
+        );
+        await db.execute(
+          'CREATE TABLE conversation(id INTEGER PRIMARY KEY AUTOINCREMENT, conversationId TEXT)',
         );
       },
       version: 1,
     );
+    await _loadConversationId();
     _loadMessages();
+  }
+
+  Future<void> _loadConversationId() async {
+    final List<Map<String, dynamic>> maps = await _database.query('conversation');
+    if (maps.isNotEmpty) {
+      _conversationId = maps.first['conversationId'];
+    } else {
+      _conversationId = _generateConversationId();
+      await _database.insert(
+        'conversation',
+        {'conversationId': _conversationId},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
+  String _generateConversationId() {
+    return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
   Future<void> _loadMessages() async {
@@ -142,6 +169,8 @@ class ChatController extends GetxController {
         };
       }).toList();
 
+      log('Conversation ID: $_conversationId');
+
       // Make an HTTP request to the Chatbase API
       final response = await http.post(
         Uri.parse(chatbaseApiUrl),
@@ -152,6 +181,7 @@ class ChatController extends GetxController {
         body: jsonEncode({
           'messages': messagesForApi,
           'chatbotId': chatBotId,
+          'conversationId': _conversationId,
           'stream': false,
           'temperature': 0,
         }),
