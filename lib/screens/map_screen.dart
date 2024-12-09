@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:meu_assistant/widgets/custom_expandable_fab.dart';
 import 'package:meu_assistant/widgets/simpler_custom_loading.dart';
 import 'package:get/get.dart';
+import '../models/map_location.dart';
 import '../services/map_service.dart';
 import '../widgets/base_scaffold.dart';
 
@@ -19,11 +20,15 @@ class MapScreen extends StatefulWidget {
   MapScreenState createState() => MapScreenState();
 }
 
-class MapScreenState extends State<MapScreen> {
+class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixin {
   final MapService mapService = Get.put(MapService());
   String? mapStyle;
   late Future<bool> _locationPermissionFuture;
   final Set<Polyline> _polylines = {};
+  final _searchController = TextEditingController();
+  List<MapLocation> _searchResults = [];
+  bool _isSearching = false;
+  late AnimationController _animationController;
 
   @override
   void initState() {
@@ -37,12 +42,108 @@ class MapScreenState extends State<MapScreen> {
     mapService.onMarkerTapped = (LatLng position) {
       log('Marker tapped at: ${position.latitude}, ${position.longitude}');
     };
+    _searchController.addListener(() => _onSearchChanged(_searchController.text));
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
   }
 
   @override
   void dispose() {
     mapService.dispose();
+    _searchController.dispose();
+    _animationController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      _searchResults = mapService.getLocations(context).where((location) {
+        return location.name.toLowerCase().contains(value.toLowerCase());
+      }).toList();
+    });
+  }
+
+  void _toggleSearchMode() {
+    setState(() {
+      if (_isSearching) {
+        _animationController.reverse();
+        _searchController.clear();
+        _searchResults.clear();
+      } else {
+        _animationController.forward();
+        _searchResults = mapService.getLocations(context);
+      }
+      _isSearching = !_isSearching;
+    });
+  }
+
+  Widget _buildSearchInput() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 56.0, right: 8.0), // Adjust padding for drawer action
+        child: TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.search,
+            prefixIcon: Icon(Icons.search),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+          onChanged: _onSearchChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchSheet() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(25),
+        ),
+        color: _isSearching ? Theme.of(context).colorScheme.primary : null,
+      ),
+      height: _isSearching ? 250 : 0,
+      width: MediaQuery.of(context).size.width,
+      child: Column(
+        children: [
+          if (_isSearching)
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25),
+                child: ListView.builder(
+                  itemCount: _searchResults.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: Icon(
+                        Icons.location_city,
+                      ),
+                      title: Text(
+                        _searchResults[index].name,
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          Icons.pin_drop,
+                        ),
+                        onPressed: () {
+                          // TODO: Implement the click functionality to target the pin
+                        },
+                      ),
+                      onTap: () {
+                        // TODO: Implement the click functionality to target the pin
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMap(bool locationEnabled) {
@@ -109,18 +210,35 @@ class MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return BaseScaffold(
-      appBarTitle: AppLocalizations.of(context)!.mapScreenTitle,
-      body: FutureBuilder<bool>(
-        future: _locationPermissionFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildLoading();
-          } else if (snapshot.hasError || !snapshot.hasData) {
-            return _buildMap(false);
-          } else {
-            return _buildMap(snapshot.data!);
-          }
-        },
+      appBarTitle: _isSearching ? null : AppLocalizations.of(context)!.mapScreenTitle,
+      appBarActions: [
+        if (_isSearching) _buildSearchInput(),
+        IconButton(
+          icon: Icon(_isSearching ? Icons.close : Icons.search),
+          onPressed: _toggleSearchMode,
+        ),
+      ],
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                  child: FutureBuilder<bool>(
+                future: _locationPermissionFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _buildLoading();
+                  } else if (snapshot.hasError || !snapshot.hasData) {
+                    return _buildMap(false);
+                  } else {
+                    return _buildMap(snapshot.data!);
+                  }
+                },
+              )),
+            ],
+          ),
+          _buildSearchSheet(),
+        ],
       ),
       fab: Obx(
         () => CustomExpandableFab(

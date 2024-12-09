@@ -12,11 +12,13 @@ class BaseScaffold extends StatelessWidget {
     required this.body,
     this.appBarTitle,
     this.fab,
+    this.appBarActions,
   });
 
   final Widget body;
   final String? appBarTitle;
   final Widget? fab;
+  final List<Widget>? appBarActions;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,7 @@ class BaseScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarTitle ?? 'App'),
+        actions: appBarActions,
       ),
       drawer: AppDrawer(settingsController: settingsController),
       body: Obx(() {
