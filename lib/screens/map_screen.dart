@@ -39,6 +39,12 @@ class MapScreenState extends State<MapScreen> {
     };
   }
 
+  @override
+  void dispose() {
+    mapService.dispose();
+    super.dispose();
+  }
+
   Widget _buildMap(bool locationEnabled) {
     return Obx(
       () => GoogleMap(
@@ -54,33 +60,46 @@ class MapScreenState extends State<MapScreen> {
         markers: mapService.getMarkers(context),
         polylines: _polylines,
         mapToolbarEnabled: false,
-        // style: mapStyle, //TODO Uncomment this line after adding all the custom markers
+        style: mapStyle, //TODO Uncomment this line after adding all the custom markers
       ),
     );
   }
 
   void _createRoute() async {
-    if (mapService.lastSelectedMarker.value == null) {
-      // Handle the case where no marker is selected
-      return;
-    }
+    try {
+      if (mapService.lastSelectedMarker.value == null) {
+        // Handle the case where no marker is selected
+        return;
+      }
 
-    LatLng? userLocation = await mapService.getUserLocation();
-    if (userLocation != null) {
-      LatLng targetLocation = mapService.lastSelectedMarker.value!;
-      await mapService.getRoute(userLocation, targetLocation);
-      setState(() {
-        _polylines.add(Polyline(
-          polylineId: PolylineId('route'),
-          points: mapService.routePoints,
-          color: Colors.blue,
-          width: 5,
-        ));
-      });
-    } else {
-      // Handle the case where user location is not available,
-      return;
+      LatLng? userLocation = await mapService.getUserLocation();
+      if (userLocation != null) {
+        LatLng targetLocation = mapService.lastSelectedMarker.value!;
+        await mapService.getRoute(userLocation, targetLocation);
+        setState(() {
+          _polylines.add(Polyline(
+            polylineId: PolylineId('route'),
+            points: mapService.routePoints,
+            color: Colors.blue,
+            width: 5,
+          ));
+        });
+        await mapService.setCameraToRoute(); // Set camera to fit the route
+      } else {
+        // Handle the case where user location is not available
+        return;
+      }
+    } catch (e) {
+      log('Error creating route: $e');
+      // Handle the error appropriately
     }
+  }
+
+  void _clearRoute() {
+    setState(() {
+      _polylines.clear();
+      mapService.clearRoute();
+    });
   }
 
   Widget _buildLoading() {
@@ -110,9 +129,7 @@ class MapScreenState extends State<MapScreen> {
           children: [
             ActionButton(
               icon: Icon(
-                mapService.markersVisible
-                    ? Icons.location_pin
-                    : Icons.location_off,
+                mapService.markersVisible ? Icons.location_pin : Icons.location_off,
               ),
               onPressed: () {
                 mapService.toggleMarkers();
@@ -131,11 +148,16 @@ class MapScreenState extends State<MapScreen> {
                       height: 30,
                       child: SimplerCustomLoader(),
                     )
-                  : Icon(Icons.directions),
-              onPressed: mapService.isRouteLoading.value ||
-                      mapService.lastSelectedMarker.value == null
+                  : Icon(_polylines.isEmpty ? Icons.directions : Icons.clear),
+              onPressed: mapService.isRouteLoading.value
                   ? null
-                  : _createRoute,
+                  : () {
+                      if (_polylines.isEmpty) {
+                        _createRoute();
+                      } else {
+                        _clearRoute();
+                      }
+                    },
             ),
           ],
         ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:developer';
 
 class SettingsService {
   static const String themeModeKey = 'theme_mode';
@@ -19,7 +21,9 @@ class SettingsService {
 
   Future<Locale> locale() async {
     final prefs = await SharedPreferences.getInstance();
-    final localeString = prefs.getString('locale') ?? 'en';
+    final localeString = prefs.getString('locale') ?? Get.deviceLocale?.languageCode ?? 'tr';
+    log(prefs.getString('locale') ?? 'prefs.getString is null');
+    log(Get.deviceLocale?.languageCode ?? 'Get.devicelocale is null');
     return Locale(localeString);
   }
 

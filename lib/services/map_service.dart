@@ -12,14 +12,6 @@ import 'package:get/get.dart';
 import 'package:meu_assistant/constants/api_info.dart';
 import 'package:meu_assistant/models/map_location.dart';
 
-// TODO DENİZ Add University related markers
-
-//TODO DENİZ When finished, add all to app_en.arb and app_tr.arb and apply here for localization
-
-//TODO When a route is created, make other markers invisible
-
-//TODO When a route is created, add a button to clear the route
-
 //TODO DENİZ Find University ring routes
 
 class MapService extends GetxController {
@@ -50,7 +42,13 @@ class MapService extends GetxController {
         position: location.position,
         infoWindow: InfoWindow(title: location.name),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        visible: _markersVisible.value,
+        visible: _markers
+            .firstWhere(
+              (marker) => marker.markerId.value == location.name,
+              orElse: () =>
+                  Marker(markerId: MarkerId('')).copyWith(visibleParam: _markersVisible.value),
+            )
+            .visible,
         onTap: () {
           lastSelectedMarker.value = location.position;
           if (onMarkerTapped != null) {
@@ -126,9 +124,27 @@ class MapService extends GetxController {
       );
 
       if (result.points.isNotEmpty) {
-        _routePoints = result.points
-            .map((point) => LatLng(point.latitude, point.longitude))
-            .toList();
+        _routePoints =
+            result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+        result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+
+        // Make other markers invisible
+        _markersVisible.value = false;
+        _markers = _markers.map((marker) {
+          return marker.copyWith(visibleParam: false);
+        }).toSet();
+        // Make the routed pin visible
+        _markers = _markers.map((marker) {
+          if (marker.position == end) {
+            log('Marker position: ${marker.position}');
+            log('End position: $end');
+            log('********');
+            log('Setting marker visible');
+            log('********');
+            return marker.copyWith(visibleParam: true);
+          }
+          return marker;
+        }).toSet();
       } else {
         log('No route points found');
       }
@@ -169,6 +185,33 @@ class MapService extends GetxController {
 
   void clearLastSelectedMarker() {
     lastSelectedMarker.value = null;
+  }
+
+  void clearRoute() {
+    _routePoints.clear();
+    _markersVisible.value = true;
+    _markers = _markers.map((marker) {
+      return marker.copyWith(visibleParam: true);
+    }).toSet();
+  }
+
+  Future<void> setCameraToRoute() async {
+    if (_routePoints.isEmpty) return;
+
+    final GoogleMapController controller = await _controller.future;
+    LatLngBounds bounds = LatLngBounds(
+      southwest: _routePoints.reduce((a, b) => LatLng(
+            a.latitude < b.latitude ? a.latitude : b.latitude,
+            a.longitude < b.longitude ? a.longitude : b.longitude,
+          )),
+      northeast: _routePoints.reduce((a, b) => LatLng(
+            a.latitude > b.latitude ? a.latitude : b.latitude,
+            a.longitude > b.longitude ? a.longitude : b.longitude,
+          )),
+    );
+
+    CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
+    controller.animateCamera(cameraUpdate);
   }
 
 //TODO Some names are not displayed fully, Needs to be fixed
@@ -303,12 +346,7 @@ class MapService extends GetxController {
         name: AppLocalizations.of(context)!.loc_23,
         position: LatLng(36.788751, 34.523013),
         email: "sksdb@mersin.edu.tr",
-        phones: [
-          "324 361 00 01",
-          "324 361 00 26",
-          "324 361 00 27",
-          "324 361 00 96"
-        ],
+        phones: ["324 361 00 01", "324 361 00 26", "324 361 00 27", "324 361 00 96"],
       ),
       MapLocation(
         name: AppLocalizations.of(context)!.loc_24,
@@ -455,11 +493,10 @@ class MapService extends GetxController {
         // no email and phone
       ),
       MapLocation(
+        //TODO DENİZ Fix position
         name: AppLocalizations.of(context)!.loc_50,
         position: LatLng(36.771218, 34.538934),
         // no email and phone
-        //Vural Ülkü Konferans Salonu Tam konumunu bulamadım
-        //TODO CAN Sakın yazan konuma bakma
       ),
       MapLocation(
         name: AppLocalizations.of(context)!.loc_51,
