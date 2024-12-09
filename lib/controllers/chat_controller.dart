@@ -5,29 +5,26 @@ import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/chat_message.dart';
+import '../constants/api_info.dart';
 
-//TODO Add Voice Recognition or NLP
-
-//TODO DENİZ: Add to knowledge base: Öğrenci Kayıt Süreci
-
-//TODO When sending a message, add info about the user. Ex: App language
+//TODO unique conversation id
 
 class ChatController extends GetxController {
   final RxList<ChatMessage> _messages = <ChatMessage>[].obs;
   List<ChatMessage> get messages => _messages.reversed.toList();
 
   late Database _database;
-  bool isTyping = false;
   final RxBool isLoading = true.obs;
+  final RxBool isTyping = false.obs;
 
   final ScrollController scrollController = ScrollController();
   final RxBool showScrollDownButton = false.obs;
 
-  //TODO DENİZ Soruları düzenle. app_tr ve app_en'de
   List<String> get sampleQuestions => [
         AppLocalizations.of(Get.context!)!.question1,
         AppLocalizations.of(Get.context!)!.question2,
@@ -103,6 +100,16 @@ class ChatController extends GetxController {
     update(); // Update the UI after loading messages
   }
 
+  String formattedMessage(String message) {
+    // Remove messages written in []
+    final regex = RegExp(r'\[.*?\]');
+    message = message.replaceAll(regex, '');
+
+    // Remove **
+    message = message.replaceAll('**', '');
+    return message.trim();
+  }
+
   Future<void> addMessage(String message, bool isSentByUser) async {
     // Check the number of messages
     final count = Sqflite.firstIntValue(await _database.rawQuery('SELECT COUNT(*) FROM messages'));
@@ -123,42 +130,70 @@ class ChatController extends GetxController {
     _messages.add(ChatMessage(id: id, message: message, isSentByUser: isSentByUser));
 
     // Show typing indicator
-    isTyping = true;
+    isTyping.value = true;
     update(); // Refresh the UI
 
     try {
-      //TODO Remove later, dummy delay
-      await Future.delayed(Duration(seconds: 1));
-      // Make an HTTP request
-      final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts/1'));
-      log('Response status: ${response.statusCode}');
-      log('Response body: ${response.body}');
+      // Prepare the messages for the API request
+      final messagesForApi = _messages.map((msg) {
+        return {
+          'content': msg.message,
+          'role': msg.isSentByUser ? 'user' : 'assistant',
+        };
+      }).toList();
+
+      // Make an HTTP request to the Chatbase API
+      final response = await http.post(
+        Uri.parse(chatbaseApiUrl),
+        headers: {
+          'Authorization': 'Bearer $chatbaseKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'messages': messagesForApi,
+          'chatbotId': chatBotId,
+          'stream': false,
+          'temperature': 0,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final errorData = jsonDecode(response.body);
+        log('Failed to fetch data: ${errorData['message']}');
+      }
+
+      final decodedResponse = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(decodedResponse);
+      var replyMessage = data['text'];
+
+      log('Reply message: $replyMessage');
+
+      // Format the reply message
+      replyMessage = formattedMessage(replyMessage);
+
+      // Insert the reply message into the database
+      final replyId = await _database.insert(
+        'messages',
+        ChatMessage(
+          message: replyMessage,
+          isSentByUser: false,
+        ).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      _messages.add(
+        ChatMessage(
+          id: replyId,
+          message: replyMessage,
+          isSentByUser: false,
+        ),
+      );
     } catch (e) {
       log('Failed to fetch data: $e');
       // Handle the error, e.g., show a message to the user
     }
 
-    // Mock delay and reply
-    final replyMessage =
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-    final replyId = await _database.insert(
-      'messages',
-      ChatMessage(
-        message: replyMessage,
-        isSentByUser: false,
-      ).toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    _messages.add(
-      ChatMessage(
-        id: replyId,
-        message: replyMessage,
-        isSentByUser: false,
-      ),
-    );
-
     // Hide typing indicator
-    isTyping = false;
+    isTyping.value = false;
     update(); // Refresh the UI
   }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/chat_controller.dart';
 import '../widgets/base_scaffold.dart';
 import '../widgets/typing_indicator.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 
 class ChatScreen extends StatelessWidget {
   ChatScreen({super.key});
@@ -30,17 +32,21 @@ class ChatScreen extends StatelessWidget {
                         ? Center(child: const CircularProgressIndicator.adaptive())
                         : ListView.builder(
                             controller: chatController.scrollController,
-                            itemCount: chatController.messages.length + 1,
+                            itemCount: chatController.messages.length + 2,
                             reverse: true,
                             itemBuilder: (context, index) {
+                              if (index == 1) {
+                                return TypingIndicator(
+                                  isTyping: chatController.isTyping.value,
+                                );
+                              }
                               if (index == 0) {
-                                //TODO Set a different sized box for IOS.
                                 return SizedBox(
                                   height:
                                       Theme.of(context).platform == TargetPlatform.iOS ? 22 : 56,
                                 );
                               }
-                              final message = chatController.messages[index - 1];
+                              final message = chatController.messages[index - 2];
                               return ListTile(
                                 title: Align(
                                   alignment: message.isSentByUser
@@ -57,9 +63,21 @@ class ChatScreen extends StatelessWidget {
                                           : const Color.fromARGB(255, 80, 80, 80),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Text(
-                                      message.message,
+                                    child: Linkify(
+                                      onOpen: (link) async {
+                                        final url = link.url.endsWith(')')
+                                            ? link.url.substring(0, link.url.length - 1)
+                                            : link.url;
+                                        final uri = Uri.parse(url);
+                                        if (await canLaunchUrl(uri)) {
+                                          await launchUrl(uri);
+                                        } else {
+                                          throw 'Could not launch $link';
+                                        }
+                                      },
+                                      text: message.message,
                                       style: const TextStyle(color: Colors.white),
+                                      linkStyle: const TextStyle(color: Colors.blueAccent),
                                     ),
                                   ),
                                 ),
@@ -67,11 +85,6 @@ class ChatScreen extends StatelessWidget {
                             },
                           );
                   }),
-                  GetBuilder<ChatController>(
-                    builder: (controller) {
-                      return TypingIndicator(isTyping: controller.isTyping);
-                    },
-                  ),
                   Positioned(
                     bottom: 0,
                     left: 0,

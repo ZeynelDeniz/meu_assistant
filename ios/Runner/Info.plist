@@ -49,6 +49,13 @@
 	<array>
 		<string>location</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>sms</string>
+		<string>tel</string>
+		<string>http</string>
+		<string>https</string>
+	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to ensure the app works correctly.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
