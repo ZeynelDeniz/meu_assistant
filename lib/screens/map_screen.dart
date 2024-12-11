@@ -17,6 +17,8 @@ class MapScreen extends StatefulWidget {
   MapScreenState createState() => MapScreenState();
 }
 
+//TODO After changing language, the search results are not updated, which causes the app to crash when selecting a location
+
 class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixin {
   final MapService mapService = Get.put(MapService());
   String? mapStyle;
@@ -81,10 +83,12 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
     try {
       if (mapService.lastSelectedMarker.value == null) {
         // Handle the case where no marker is selected
+        log('BUG: No marker selected');
         return;
       }
 
       LatLng? userLocation = await mapService.getUserLocation();
+      log('User location: $userLocation');
       if (userLocation != null) {
         LatLng targetLocation = mapService.lastSelectedMarker.value!;
         await mapService.getRoute(userLocation, targetLocation);
@@ -153,14 +157,15 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
 
   Widget _buildMapButtons() {
     return Positioned(
-      bottom: 16,
+      bottom: 36,
       left: 16,
       child: Column(
         children: [
           FloatingActionButton(
             heroTag: 'createOrClearRoute',
             backgroundColor: Theme.of(context).colorScheme.primary,
-            onPressed: mapService.isRouteLoading.value
+            onPressed: mapService.isRouteLoading.value ||
+                    (mapService.lastSelectedMarker.value == null && _polylines.isEmpty)
                 ? null
                 : () {
                     if (_polylines.isEmpty) {
@@ -179,7 +184,9 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
                   )
                 : Icon(
                     _polylines.isEmpty ? Icons.directions : Icons.clear,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    color: mapService.lastSelectedMarker.value == null && _polylines.isEmpty
+                        ? Colors.grey
+                        : Theme.of(context).textTheme.bodyLarge?.color,
                   ),
           ),
           SizedBox(height: 8),
@@ -223,6 +230,7 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
           controller: _searchController,
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context)!.search,
+            hintStyle: TextStyle(color: Colors.grey),
             prefixIcon: Icon(Icons.search),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),

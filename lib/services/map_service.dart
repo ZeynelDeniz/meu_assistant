@@ -12,7 +12,9 @@ import 'package:get/get.dart';
 import 'package:meu_assistant/constants/api_info.dart';
 import 'package:meu_assistant/models/map_location.dart';
 
-//TODO DENİZ Find University ring routes
+//TODO Add University ring routes
+
+//TODO Custom bottom sheet when marker tapped
 
 class MapService extends GetxController {
   final _controller = Completer<GoogleMapController>();
@@ -40,7 +42,10 @@ class MapService extends GetxController {
       return Marker(
         markerId: MarkerId(location.name),
         position: location.position,
-        infoWindow: InfoWindow(title: location.name),
+        infoWindow: InfoWindow(
+          title: location.name,
+          snippet: location.email,
+        ),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
         visible: _markers
             .firstWhere(
@@ -175,10 +180,12 @@ class MapService extends GetxController {
 
       var status = await Permission.locationWhenInUse.status;
       if (status.isDenied) {
+        log('Location permission is denied.');
         return null;
       }
 
       LocationData locationData = await location.getLocation();
+      //TODO Bug here for IOS Simulator only, cant get location. Test with real device
       return LatLng(locationData.latitude!, locationData.longitude!);
     } on PlatformException catch (e) {
       log('Location error: $e');
@@ -220,7 +227,7 @@ class MapService extends GetxController {
     controller.animateCamera(cameraUpdate);
   }
 
-//TODO Some names are not displayed fully, Needs to be fixed
+//TODO Some names are not displayed fully, overflowing. Needs to be fixed
   List<MapLocation> getLocations(BuildContext context) {
     return [
       MapLocation(

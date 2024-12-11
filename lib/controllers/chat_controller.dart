@@ -12,7 +12,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/chat_message.dart';
 import '../constants/api_info.dart';
 
-//TODO unique conversation id
+//TODO Connect the map pins, add a button to navigate from chat to map with the selected location
 
 class ChatController extends GetxController {
   final RxList<ChatMessage> _messages = <ChatMessage>[].obs;
