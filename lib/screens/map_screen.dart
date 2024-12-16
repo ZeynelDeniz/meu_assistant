@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import '../models/map_location.dart';
 import '../services/map_service.dart';
 import '../widgets/base_scaffold.dart';
+import '../services/map_data.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -19,11 +20,14 @@ class MapScreen extends StatefulWidget {
 
 //TODO After changing language, the search results are not updated, which causes the app to crash when selecting a location
 
+//TODO Add bottomsheet for markerinfo, make the buttons slide up with animation
+
 class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixin {
   final MapService mapService = Get.put(MapService());
   String? mapStyle;
   late Future<bool> _locationPermissionFuture;
   final Set<Polyline> _polylines = {};
+  final Set<Polyline> _staticPolylines = {};
   final _searchController = TextEditingController();
   List<MapLocation> _searchResults = [];
   bool _isSearching = false;
@@ -46,6 +50,13 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
+    mapService.toggleStaticRoute();
+    _staticPolylines.add(Polyline(
+      polylineId: PolylineId('staticRoute'),
+      points: staticRoutePoints,
+      color: Colors.red,
+      width: 5,
+    ));
   }
 
   @override
@@ -58,7 +69,7 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
 
   void _onSearchChanged(String value) {
     setState(() {
-      _searchResults = mapService.getLocations(context).where((location) {
+      _searchResults = getLocations(context).where((location) {
         return location.name.toLowerCase().contains(value.toLowerCase());
       }).toList()
         ..sort((a, b) => a.name.compareTo(b.name));
@@ -73,7 +84,7 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
         _searchResults.clear();
       } else {
         _animationController.forward();
-        _searchResults = mapService.getLocations(context)..sort((a, b) => a.name.compareTo(b.name));
+        _searchResults = getLocations(context)..sort((a, b) => a.name.compareTo(b.name));
       }
       _isSearching = !_isSearching;
     });
@@ -161,6 +172,20 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
       left: 16,
       child: Column(
         children: [
+          FloatingActionButton(
+            heroTag: 'toggleStaticRoute',
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            child: Icon(
+              mapService.staticRouteVisible ? Icons.directions_bus : Icons.directions_bus_outlined,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+            onPressed: () {
+              setState(() {
+                mapService.toggleStaticRoute();
+              });
+            },
+          ),
+          SizedBox(height: 8),
           FloatingActionButton(
             heroTag: 'createOrClearRoute',
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -308,7 +333,10 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
         initialCameraPosition: mapService.initialCameraPosition,
         onMapCreated: mapService.onMapCreated,
         markers: mapService.getMarkers(context),
-        polylines: _polylines,
+        polylines: {
+          ..._polylines,
+          if (mapService.staticRouteVisible) ..._staticPolylines,
+        },
         mapToolbarEnabled: false,
         style: mapStyle,
       ),
