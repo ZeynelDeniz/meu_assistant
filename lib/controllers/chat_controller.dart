@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:meu_assistant/constants/api_info.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
@@ -10,7 +11,6 @@ import 'dart:convert';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/chat_message.dart';
-import '../constants/api_info.dart';
 
 //TODO Connect the map pins, add a button to navigate from chat to map with the selected location
 
@@ -97,7 +97,8 @@ class ChatController extends GetxController {
   }
 
   Future<void> _loadConversationId() async {
-    final List<Map<String, dynamic>> maps = await _database.query('conversation');
+    final List<Map<String, dynamic>> maps =
+        await _database.query('conversation');
     if (maps.isNotEmpty) {
       _conversationId = maps.first['conversationId'];
     } else {
@@ -139,7 +140,8 @@ class ChatController extends GetxController {
 
   Future<void> addMessage(String message, bool isSentByUser) async {
     // Check the number of messages
-    final count = Sqflite.firstIntValue(await _database.rawQuery('SELECT COUNT(*) FROM messages'));
+    final count = Sqflite.firstIntValue(
+        await _database.rawQuery('SELECT COUNT(*) FROM messages'));
     if (count != null && count >= 30) {
       // Delete the oldest message
       await _database.delete(
@@ -154,7 +156,8 @@ class ChatController extends GetxController {
       ChatMessage(message: message, isSentByUser: isSentByUser).toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    _messages.add(ChatMessage(id: id, message: message, isSentByUser: isSentByUser));
+    _messages
+        .add(ChatMessage(id: id, message: message, isSentByUser: isSentByUser));
 
     // Show typing indicator
     isTyping.value = true;

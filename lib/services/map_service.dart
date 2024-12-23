@@ -12,7 +12,7 @@ import 'package:meu_assistant/constants/api_info.dart';
 import 'package:meu_assistant/models/map_location.dart';
 import 'package:meu_assistant/services/map_data.dart';
 
-//TODO Add University ring routes
+//TODO Add University ring stops
 
 //TODO Custom bottom sheet when marker tapped
 
@@ -52,8 +52,8 @@ class MapService extends GetxController {
         visible: _markers
             .firstWhere(
               (marker) => marker.markerId.value == location.name,
-              orElse: () =>
-                  Marker(markerId: MarkerId('')).copyWith(visibleParam: _markersVisible.value),
+              orElse: () => Marker(markerId: MarkerId(''))
+                  .copyWith(visibleParam: _markersVisible.value),
             )
             .visible,
         onTap: () {
@@ -137,9 +137,12 @@ class MapService extends GetxController {
       );
 
       if (result.points.isNotEmpty) {
-        _routePoints =
-            result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
-        result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+        _routePoints = result.points
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList();
+        result.points
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList();
 
         // Make other markers invisible
         _markersVisible.value = false;
