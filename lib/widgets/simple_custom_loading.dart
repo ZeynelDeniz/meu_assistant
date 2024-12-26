@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-class EvenSimplerCustomLoader extends StatefulWidget {
+class SimpleCustomLoadingIndicator extends StatefulWidget {
   final Color color;
   final double size;
 
-  const EvenSimplerCustomLoader({
+  const SimpleCustomLoadingIndicator({
     super.key,
     this.color = Colors.blue,
     this.size = 25,
   });
 
   @override
-  State<EvenSimplerCustomLoader> createState() => _EvenSimplerCustomLoaderState();
+  State<SimpleCustomLoadingIndicator> createState() => _SimpleCustomLoadingIndicatorState();
 }
 
-class _EvenSimplerCustomLoaderState extends State<EvenSimplerCustomLoader>
+class _SimpleCustomLoadingIndicatorState extends State<SimpleCustomLoadingIndicator>
     with TickerProviderStateMixin {
   late Animation<double> animation1;
 

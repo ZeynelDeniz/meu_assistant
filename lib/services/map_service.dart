@@ -14,8 +14,6 @@ import 'package:meu_assistant/services/map_data.dart';
 
 //TODO Add University ring stops
 
-//TODO Custom bottom sheet when marker tapped
-
 class MapService extends GetxController {
   final _controller = Completer<GoogleMapController>();
   final _campusCenter = LatLng(36.786659, 34.525297);
@@ -23,6 +21,7 @@ class MapService extends GetxController {
   final _markersVisible = true.obs;
   bool get markersVisible => _markersVisible.value;
   Set<Marker> _markers = {};
+  Set<Marker> _ringStopMarkers = {};
   Function(LatLng)? onMarkerTapped;
   List<LatLng> _routePoints = [];
   List<LatLng> get routePoints => _routePoints;
@@ -31,6 +30,22 @@ class MapService extends GetxController {
   final _staticRouteVisible = false.obs;
   bool get staticRouteVisible => _staticRouteVisible.value;
 
+  late BitmapDescriptor busStopIcon;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadCustomIcons();
+  }
+
+  Future<void> _loadCustomIcons() async {
+    busStopIcon = await BitmapDescriptor.asset(
+      const ImageConfiguration(size: Size(32, 32)),
+      'assets/icons/bus_stop.png',
+    );
+    update();
+  }
+
   CameraPosition get initialCameraPosition {
     return CameraPosition(
       target: _campusCenter,
@@ -38,11 +53,31 @@ class MapService extends GetxController {
     );
   }
 
+  Set<Marker> getRingStopMarkers(BuildContext context) {
+    final ringStops = getRingStops(context);
+    _ringStopMarkers = ringStops.map((stop) {
+      return Marker(
+        markerId: MarkerId(stop.name),
+        position: stop.position,
+        icon: busStopIcon,
+        visible: _staticRouteVisible.value,
+        onTap: () {
+          lastSelectedMarker.value = stop.position;
+          if (onMarkerTapped != null) {
+            onMarkerTapped!(lastSelectedMarker.value!);
+          }
+        },
+      );
+    }).toSet();
+
+    return _ringStopMarkers;
+  }
+
   Set<Marker> getMarkers(BuildContext context) {
     final locations = getLocations(context);
     _markers = locations.map((location) {
       return Marker(
-        markerId: MarkerId(location.name),
+        markerId: MarkerId(location!.name),
         position: location.position,
         infoWindow: InfoWindow(
           title: location.name,
@@ -52,8 +87,8 @@ class MapService extends GetxController {
         visible: _markers
             .firstWhere(
               (marker) => marker.markerId.value == location.name,
-              orElse: () => Marker(markerId: MarkerId(''))
-                  .copyWith(visibleParam: _markersVisible.value),
+              orElse: () =>
+                  Marker(markerId: MarkerId('')).copyWith(visibleParam: _markersVisible.value),
             )
             .visible,
         onTap: () {
@@ -71,6 +106,13 @@ class MapService extends GetxController {
     _markersVisible.value = !_markersVisible.value;
     _markers = _markers.map((marker) {
       return marker.copyWith(visibleParam: _markersVisible.value);
+    }).toSet();
+  }
+
+  void toggleRingRoute() {
+    _staticRouteVisible.value = !_staticRouteVisible.value;
+    _ringStopMarkers = _ringStopMarkers.map((marker) {
+      return marker.copyWith(visibleParam: _staticRouteVisible.value);
     }).toSet();
   }
 
@@ -137,12 +179,9 @@ class MapService extends GetxController {
       );
 
       if (result.points.isNotEmpty) {
-        _routePoints = result.points
-            .map((point) => LatLng(point.latitude, point.longitude))
-            .toList();
-        result.points
-            .map((point) => LatLng(point.latitude, point.longitude))
-            .toList();
+        _routePoints =
+            result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+        result.points.map((point) => LatLng(point.latitude, point.longitude)).toList();
 
         // Make other markers invisible
         _markersVisible.value = false;
@@ -152,11 +191,6 @@ class MapService extends GetxController {
         // Make the routed pin visible
         _markers = _markers.map((marker) {
           if (marker.position == end) {
-            log('Marker position: ${marker.position}');
-            log('End position: $end');
-            log('********');
-            log('Setting marker visible');
-            log('********');
             return marker.copyWith(visibleParam: true);
           }
           return marker;
@@ -230,9 +264,5 @@ class MapService extends GetxController {
 
     CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 50);
     controller.animateCamera(cameraUpdate);
-  }
-
-  void toggleStaticRoute() {
-    _staticRouteVisible.value = !_staticRouteVisible.value;
   }
 }

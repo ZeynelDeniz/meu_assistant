@@ -97,8 +97,7 @@ class ChatController extends GetxController {
   }
 
   Future<void> _loadConversationId() async {
-    final List<Map<String, dynamic>> maps =
-        await _database.query('conversation');
+    final List<Map<String, dynamic>> maps = await _database.query('conversation');
     if (maps.isNotEmpty) {
       _conversationId = maps.first['conversationId'];
     } else {
@@ -129,19 +128,37 @@ class ChatController extends GetxController {
   }
 
   String formattedMessage(String message) {
+    log('Message without Format: $message');
+
     // Remove messages written in []
     final regex = RegExp(r'\[.*?\]');
     message = message.replaceAll(regex, '');
 
-    // Remove **
+    // Remove the **
     message = message.replaceAll('**', '');
+
+    // Find and replace loc_XX with a placeholder
+    final locRegex = RegExp(r'loc_(\d+)');
+    message = message.replaceAllMapped(locRegex, (match) {
+      final locationNumber = match.group(1);
+      return '<loc_$locationNumber>'; // Placeholder for clickable text
+    });
+
+    // Find and replace URLs within parentheses with a placeholder
+    final urlRegex = RegExp(r'\((https?://[^\s]+)\)');
+    message = message.replaceAllMapped(urlRegex, (match) {
+      final url = match.group(1);
+      return '<url_$url>'; // Placeholder for clickable URL
+    });
+
+    log('Message with Format: $message');
+
     return message.trim();
   }
 
   Future<void> addMessage(String message, bool isSentByUser) async {
     // Check the number of messages
-    final count = Sqflite.firstIntValue(
-        await _database.rawQuery('SELECT COUNT(*) FROM messages'));
+    final count = Sqflite.firstIntValue(await _database.rawQuery('SELECT COUNT(*) FROM messages'));
     if (count != null && count >= 30) {
       // Delete the oldest message
       await _database.delete(
@@ -156,8 +173,7 @@ class ChatController extends GetxController {
       ChatMessage(message: message, isSentByUser: isSentByUser).toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    _messages
-        .add(ChatMessage(id: id, message: message, isSentByUser: isSentByUser));
+    _messages.add(ChatMessage(id: id, message: message, isSentByUser: isSentByUser));
 
     // Show typing indicator
     isTyping.value = true;
@@ -197,7 +213,8 @@ class ChatController extends GetxController {
 
       final decodedResponse = utf8.decode(response.bodyBytes);
       final data = jsonDecode(decodedResponse);
-      var replyMessage = data['text'];
+      String replyMessage = data['text'];
+      replyMessage += ' loc_45'; //TODO Temporary, implement later.
 
       log('Reply message: $replyMessage');
 

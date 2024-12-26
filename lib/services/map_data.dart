@@ -3,7 +3,54 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:meu_assistant/models/map_location.dart';
 
-final List<LatLng> staticRoutePoints = [
+final Map<String, List<String>> ringHours = {
+  "KYK Kız Yurdu Durağı": [
+    "09:35",
+    "09:55",
+    "10:15",
+    "10:45",
+    "11:15",
+    "11:45",
+    "12:15",
+    "12:25",
+    "12:35",
+    "12:45",
+    "12:55",
+    "13:05",
+    "13:15",
+    "13:45",
+    "14:15",
+    "14:45",
+    "15:15",
+    "15:45",
+    "16:15",
+    "16:55",
+  ],
+  "Kampüs Girişi": [
+    "09:20",
+    "09:40",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:10",
+    "12:20",
+    "12:30",
+    "12:40",
+    "12:50",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:40",
+  ],
+};
+
+final List<LatLng> ringRoutePoints = [
   LatLng(36.789281, 34.538436),
   LatLng(36.788896, 34.538367),
   LatLng(36.788421, 34.538441),
@@ -387,247 +434,296 @@ final List<LatLng> staticRoutePoints = [
   LatLng(36.789281, 34.538435),
 ];
 
-List<MapLocation> getLocations(BuildContext context) {
+List<MapLocation> getRingStops(BuildContext context) {
+  return [
+    //TODO Add more stops and names to app_en.arb and app_tr.arb
+    MapLocation(
+      id: 1000, //TODO Fix later
+      name: "KYK Kız Yurdu Durağı",
+      position: LatLng(36.789243, 34.538359),
+      // Add more details if needed
+    ),
+  ];
+}
+
+List<MapLocation?> getLocations(BuildContext context) {
   return [
     MapLocation(
+        id: 1,
         name: AppLocalizations.of(context)!.loc_1,
         position: LatLng(36.785369, 34.526026),
         email: "muhendislik@mersin.edu.tr",
         phones: ["324 361 00 33", "324 361 00 01"]),
     MapLocation(
+      id: 2,
       name: AppLocalizations.of(context)!.loc_2,
       position: LatLng(36.786103, 34.525679),
       //no email and phone
     ),
     MapLocation(
+      id: 3,
       name: AppLocalizations.of(context)!.loc_3,
       position: LatLng(36.786228, 34.526015),
       //no email and phone
     ),
     MapLocation(
+      id: 4,
       name: AppLocalizations.of(context)!.loc_4,
       position: LatLng(36.783297, 34.527555),
       phones: ["324 361 0018", "324 361 00 01", "324 361 00 17"],
     ),
     MapLocation(
+      id: 5,
       name: AppLocalizations.of(context)!.loc_5,
       position: LatLng(36.783277, 34.528045),
       email: "ydilleryo@mersin.edu.tr",
       phones: ["324 361 00 38", "324 361 00 01", "324 361 02 43"],
     ),
     MapLocation(
+      id: 6,
       name: AppLocalizations.of(context)!.loc_6,
       position: LatLng(36.782376, 34.528113),
       email: "teknikbilimler@mersin.edu.tr",
       phones: ["324 361 00 38", "324 361 00 01", "324 361 00 43"],
     ),
     MapLocation(
+      id: 7,
       name: AppLocalizations.of(context)!.loc_7,
       position: LatLng(36.783463, 34.528003),
       email: "",
       phones: ["324 361 00 01", "324 361 03 43"],
     ),
     MapLocation(
+      id: 8,
       name: AppLocalizations.of(context)!.loc_8,
       position: LatLng(36.783488, 34.528069),
       email: "",
       phones: ["324 361 00 01"],
     ),
     MapLocation(
+      id: 9,
       name: AppLocalizations.of(context)!.loc_9,
       position: LatLng(36.783584, 34.526420),
       email: "meuoidb@mersin.edu.tr",
       phones: ["324 361 06 48", "324 361 01 00 "],
     ),
     MapLocation(
+      id: 10,
       name: AppLocalizations.of(context)!.loc_10,
       position: LatLng(36.783482, 34.526383),
       email: "bidb@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 06 24", "324 361 04 79"],
     ),
     MapLocation(
+      id: 11,
       name: AppLocalizations.of(context)!.loc_11,
       position: LatLng(36.784709, 34.526651),
       email: "iktisat@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 00 56"],
     ),
     MapLocation(
+      id: 12,
       name: AppLocalizations.of(context)!.loc_12,
       position: LatLng(36.784931, 34.527243),
       email: "konservatuvar@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 00 29"],
     ),
     MapLocation(
+      id: 13,
       name: AppLocalizations.of(context)!.loc_13,
       position: LatLng(36.786228, 34.525563),
       email: "basin@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 00 64", "324 361 00 63"],
     ),
     MapLocation(
+      id: 14,
       name: AppLocalizations.of(context)!.loc_14,
       position: LatLng(36.785967, 34.525493),
       email: "baum@mersin.edu.tr",
       phones: ["324 361 00 01"],
     ),
     MapLocation(
+      id: 15,
       name: AppLocalizations.of(context)!.loc_15,
       position: LatLng(36.786951, 34.525335),
       //no email and phone
     ),
     MapLocation(
+      id: 16,
       name: AppLocalizations.of(context)!.loc_16,
       position: LatLng(36.786666, 34.524407),
       //no email and phone
     ),
     MapLocation(
+      id: 17,
       name: AppLocalizations.of(context)!.loc_17,
       position: LatLng(36.787275, 34.526067),
       //no email and phone
     ),
     MapLocation(
+      id: 18,
       name: AppLocalizations.of(context)!.loc_18,
       position: LatLng(36.788089, 34.523792),
       email: "saglikyo@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 05 81", "324 361 05 71"],
     ),
     MapLocation(
+      id: 19,
       name: AppLocalizations.of(context)!.loc_19,
       position: LatLng(36.788243, 34.524717),
       email: "insanvetoplum@mersin.edu.tr",
       phones: ["324 361 00 01"],
     ),
     MapLocation(
+      id: 20,
       name: AppLocalizations.of(context)!.loc_20,
       position: LatLng(36.783510, 34.531395),
       email: "pdrm@mersin.edu.tr",
       phones: ["324 361 00 01"],
     ),
     MapLocation(
+      id: 21,
       name: AppLocalizations.of(context)!.loc_21,
       position: LatLng(36.788734, 34.523508),
       email: "iletisim@mersin.edu.tr",
       phones: ["324 361 02 23", "324 361 00 01", "324 361 04 93"],
     ),
     MapLocation(
+      id: 22,
       name: AppLocalizations.of(context)!.loc_22,
       position: LatLng(36.788765, 34.523086),
       email: "sosyalbilimler@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 02 87"],
     ),
     MapLocation(
+      id: 23,
       name: AppLocalizations.of(context)!.loc_23,
       position: LatLng(36.788751, 34.523013),
       email: "sksdb@mersin.edu.tr",
-      phones: [
-        "324 361 00 01",
-        "324 361 00 26",
-        "324 361 00 27",
-        "324 361 00 96"
-      ],
+      phones: ["324 361 00 01", "324 361 00 26", "324 361 00 27", "324 361 00 96"],
     ),
     MapLocation(
+      id: 24,
       name: AppLocalizations.of(context)!.loc_24,
       position: LatLng(36.789564, 34.523347),
       email: "hemsirelik@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 05 81", "324 361 05 71"],
     ),
     MapLocation(
+      id: 25,
       name: AppLocalizations.of(context)!.loc_25,
       position: LatLng(36.789250, 34.524011),
       email: "ileriteknoloji@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 01 53"],
     ),
     MapLocation(
+      id: 26,
       name: AppLocalizations.of(context)!.loc_26,
       position: LatLng(36.790392, 34.522605),
       email: "mimarlik.sek@mersin.edu.tr",
       phones: ["324 361 06 08"],
     ),
     MapLocation(
+      id: 27,
       name: AppLocalizations.of(context)!.loc_27,
       position: LatLng(36.790380, 34.522387),
       email: "akkent@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 01 48"],
     ),
     MapLocation(
+      id: 28,
       name: AppLocalizations.of(context)!.loc_28,
       position: LatLng(36.790555, 34.522456),
       email: "biamer@mersin.edu.tr",
       phones: ["324 361 00 01"],
     ),
     MapLocation(
+      id: 29,
       name: AppLocalizations.of(context)!.loc_29,
       position: LatLng(36.790834, 34.522611),
       email: "guzelsanatlar@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 00 68", "324 361 03 07"],
     ),
     MapLocation(
+      id: 30,
       name: AppLocalizations.of(context)!.loc_30,
       position: LatLng(36.790922, 34.522129),
       email: "takitekyo@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 07 83"],
     ),
     MapLocation(
+      id: 31,
       name: AppLocalizations.of(context)!.loc_31,
       position: LatLng(36.791756, 34.522240),
       email: "turizmfakultesi@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 07 51"],
     ),
     MapLocation(
+      id: 32,
       name: AppLocalizations.of(context)!.loc_32,
       position: LatLng(36.791677, 34.522004),
       email: "ilahiyat@mersin.edu.tr",
       phones: ["324 361 00 01"],
     ),
     MapLocation(
+      id: 33,
       name: AppLocalizations.of(context)!.loc_33,
       position: LatLng(36.790947, 34.520165),
       email: "egitim@mersin.edu.tr",
       phones: ["324 361 00 01", "324 341 28 23"],
     ),
     MapLocation(
+      id: 34,
       name: AppLocalizations.of(context)!.loc_34,
       position: LatLng(36.790417, 34.526135),
     ),
     MapLocation(
+      id: 35,
       name: AppLocalizations.of(context)!.loc_35,
       position: LatLng(36.792636, 34.519330),
     ),
     MapLocation(
+      id: 36,
       name: AppLocalizations.of(context)!.loc_36,
       position: LatLng(36.788564, 34.529016),
       email: "sbf@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 01 27"],
     ),
     MapLocation(
+      id: 37,
       name: AppLocalizations.of(context)!.loc_37,
       position: LatLng(36.788219, 34.528773),
       email: "bedenyo@mersin.edu.tr",
     ),
     MapLocation(
+      id: 38,
       name: AppLocalizations.of(context)!.loc_38,
       position: LatLng(36.788326, 34.529049),
       email: "bedenegitimi@mersin.edu.tr",
     ),
     MapLocation(
+      id: 39,
       name: AppLocalizations.of(context)!.loc_39,
       position: LatLng(36.787034, 34.530547),
       email: "sbmyo@mersin.edu.tr",
       phones: ["324 361 00 01", "324  361 03 03", "324 361 08 88"],
     ),
     MapLocation(
+      id: 40,
       name: AppLocalizations.of(context)!.loc_40,
       position: LatLng(36.788066, 34.532647),
       email: "dishek@mersin.edu.tr",
       phones: ["324 361 00 01", "324 361 03 69"],
     ),
     MapLocation(
+      id: 41,
       name: AppLocalizations.of(context)!.loc_41,
       position: LatLng(36.788205, 34.532797),
       email: "saglikhizmetleri@mersin.edu.tr",
       phones: ["324 361 00 01", "324 234 64 10"],
     ),
     MapLocation(
+      id: 42,
       name: AppLocalizations.of(context)!.loc_42,
       position: LatLng(36.786994, 34.534526),
       email: "tipfakultesi@mersin.edu.tr",
@@ -635,71 +731,85 @@ List<MapLocation> getLocations(BuildContext context) {
       // no email and phone
     ),
     MapLocation(
+      id: 43,
       name: AppLocalizations.of(context)!.loc_43,
       position: LatLng(36.785483, 34.536800),
       // no email and phone
     ),
     MapLocation(
+      id: 44,
       name: AppLocalizations.of(context)!.loc_44,
       position: LatLng(36.784434, 34.534804),
       // no email and phone
     ),
     MapLocation(
+      id: 45,
       name: AppLocalizations.of(context)!.loc_45,
-      position: LatLng(36.789305, 34.538119),
+      position: LatLng(36.789499, 34.537830),
       // no email and phone
     ),
     MapLocation(
+      id: 46,
       name: AppLocalizations.of(context)!.loc_46,
       position: LatLng(36.784559, 34.530455),
       // no email and phone
     ),
     MapLocation(
+      id: 47,
       name: AppLocalizations.of(context)!.loc_47,
       position: LatLng(36.783707, 34.536441),
       // no email and phone
     ),
     MapLocation(
+      id: 48,
       name: AppLocalizations.of(context)!.loc_48,
       position: LatLng(36.782770, 34.538749),
       // no email and phone
     ),
     MapLocation(
+      id: 49,
       name: AppLocalizations.of(context)!.loc_49,
       position: LatLng(36.787880, 34.524955),
       // no email and phone
     ),
     MapLocation(
+      id: 50,
       name: AppLocalizations.of(context)!.loc_50,
       position: LatLng(36.787539, 34.525339),
       // no email and phone
     ),
     MapLocation(
+      id: 51,
       name: AppLocalizations.of(context)!.loc_51,
       position: LatLng(36.786104, 34.524391),
       // no email and phone
     ),
     MapLocation(
+      id: 52,
       name: AppLocalizations.of(context)!.loc_52,
       position: LatLng(36.783973, 34.526185),
       // no email and phone
     ),
     MapLocation(
+      id: 53,
       name: AppLocalizations.of(context)!.loc_53,
       position: LatLng(36.787495, 34.529245),
       // no email and phone
     ),
     MapLocation(
+      id: 54,
       name: AppLocalizations.of(context)!.loc_54,
       position: LatLng(36.787946, 34.529430),
       // no email and phone
     ),
     MapLocation(
+      id: 55,
       name: AppLocalizations.of(context)!.loc_55,
       position: LatLng(36.788371, 34.533354),
       // no email and phone
     ),
     MapLocation(
+      id: 56,
       name: AppLocalizations.of(context)!.loc_56,
       position: LatLng(36.788667, 34.520686),
       // no email and phone

@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:meu_assistant/widgets/even_simpler_custom_loading.dart';
+import 'package:meu_assistant/widgets/simple_custom_loading.dart';
 import 'package:get/get.dart';
 import '../models/map_location.dart';
 import '../services/map_service.dart';
@@ -11,7 +11,9 @@ import '../widgets/base_scaffold.dart';
 import '../services/map_data.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  const MapScreen({
+    super.key,
+  });
   static const String routeName = '/map';
 
   @override
@@ -19,8 +21,6 @@ class MapScreen extends StatefulWidget {
 }
 
 //TODO After changing language, the search results are not updated, which causes the app to crash when selecting a location
-
-//TODO Add bottomsheet for markerinfo, make the buttons slide up with animation
 
 class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixin {
   final MapService mapService = Get.put(MapService());
@@ -32,6 +32,7 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
   List<MapLocation> _searchResults = [];
   bool _isSearching = false;
   late AnimationController _animationController;
+  int? initialLocationId;
 
   @override
   void initState() {
@@ -44,19 +45,44 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
     });
     mapService.onMarkerTapped = (LatLng position) {
       log('Marker tapped at: ${position.latitude}, ${position.longitude}');
+      if (mapService.getRingStopMarkers(context).any((marker) => marker.position == position)) {
+        final location = getRingStops(context).firstWhere((stop) => stop.position == position);
+        _showBottomSheet(location);
+      }
     };
     _searchController.addListener(() => _onSearchChanged(_searchController.text));
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
-    mapService.toggleStaticRoute();
+    mapService.toggleRingRoute();
     _staticPolylines.add(Polyline(
       polylineId: PolylineId('staticRoute'),
-      points: staticRoutePoints,
+      points: ringRoutePoints,
       color: Colors.red,
       width: 5,
     ));
+
+    // Get the initialLocationId from arguments
+    initialLocationId = Get.arguments?['initialLocationId'];
+    log('Initial Location ID: $initialLocationId');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (initialLocationId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        MapLocation? location = getLocations(context).firstWhere(
+          (loc) => loc?.id == initialLocationId,
+          orElse: () => null,
+        );
+        if (location != null) {
+          mapService.selectPin(location);
+          mapService.moveToLocation(location.position, zoom: 17);
+        }
+      });
+    }
   }
 
   @override
@@ -69,9 +95,12 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
 
   void _onSearchChanged(String value) {
     setState(() {
-      _searchResults = getLocations(context).where((location) {
-        return location.name.toLowerCase().contains(value.toLowerCase());
-      }).toList()
+      _searchResults = getLocations(context)
+          .where((location) {
+            return location?.name.toLowerCase().contains(value.toLowerCase()) ?? false;
+          })
+          .whereType<MapLocation>() // Filter out null values
+          .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
     });
   }
@@ -84,7 +113,8 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
         _searchResults.clear();
       } else {
         _animationController.forward();
-        _searchResults = getLocations(context)..sort((a, b) => a.name.compareTo(b.name));
+        _searchResults = getLocations(context).whereType<MapLocation>().toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
       }
       _isSearching = !_isSearching;
     });
@@ -127,6 +157,49 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
       _polylines.clear();
       mapService.clearRoute();
     });
+  }
+
+  void _showBottomSheet(MapLocation location) {
+    showModalBottomSheet(
+      barrierColor: Colors.transparent,
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          height: 300,
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).canvasColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                location.name,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Ring Saatleri',
+                style: TextStyle(fontSize: 16),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: ringHours[location.name]?.length ?? 0,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(ringHours[location.name]?[index] ?? ''),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -181,7 +254,7 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
             ),
             onPressed: () {
               setState(() {
-                mapService.toggleStaticRoute();
+                mapService.toggleRingRoute();
               });
             },
           ),
@@ -203,7 +276,7 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
                 ? SizedBox(
                     width: 30,
                     height: 30,
-                    child: EvenSimplerCustomLoader(
+                    child: SimpleCustomLoadingIndicator(
                       color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.blue,
                     ),
                   )
@@ -332,7 +405,10 @@ class MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixi
         buildingsEnabled: false,
         initialCameraPosition: mapService.initialCameraPosition,
         onMapCreated: mapService.onMapCreated,
-        markers: mapService.getMarkers(context),
+        markers: {
+          ...mapService.getMarkers(context),
+          ...mapService.getRingStopMarkers(context),
+        },
         polylines: {
           ..._polylines,
           if (mapService.staticRouteVisible) ..._staticPolylines,

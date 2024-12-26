@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -5,7 +8,6 @@ import '../controllers/chat_controller.dart';
 import '../widgets/base_scaffold.dart';
 import '../widgets/typing_indicator.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 
 class ChatScreen extends StatelessWidget {
   ChatScreen({super.key});
@@ -14,6 +16,74 @@ class ChatScreen extends StatelessWidget {
 
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  //TODO Links look weird in the chat, fix the link style
+
+  TextSpan buildMessageSpan(String message) {
+    //TODO Something wrong here, message repeats itself.
+    final locRegex = RegExp(r'<loc_(\d+)>');
+    final urlRegex = RegExp(r'<url_(https?://[^\s]+)>');
+    // final boldRegex = RegExp(r'\*\*(.*?)\*\*');
+    final spans = <TextSpan>[];
+    int start = 0;
+
+    message.splitMapJoin(
+      RegExp(r'<loc_(\d+)>|<url_(https?://[^\s]+)>'), // Remove bold regex from here
+      onMatch: (match) {
+        final locMatch = locRegex.firstMatch(match[0]!);
+        final urlMatch = urlRegex.firstMatch(match[0]!);
+        // final boldMatch = boldRegex.firstMatch(match[0]!); // Comment out bold match
+
+        if (locMatch != null) {
+          final locationNumber = locMatch.group(1);
+          spans.add(TextSpan(
+            text: message.substring(start, match.start),
+          ));
+          spans.add(TextSpan(
+            text: 'loc_$locationNumber',
+            style: TextStyle(color: Colors.blue),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                final locationId = int.tryParse(locationNumber ?? '');
+                if (locationId != null) {
+                  Get.offAndToNamed('/map', arguments: {'initialLocationId': locationId});
+                }
+              },
+          ));
+          start = match.end;
+        } else if (urlMatch != null) {
+          final url = urlMatch.group(1);
+          spans.add(TextSpan(
+            text: message.substring(start, match.start),
+          ));
+          spans.add(TextSpan(
+            text: url,
+            style: TextStyle(color: Colors.blue),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () async {
+                final uri = Uri.parse(url!);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri);
+                } else {
+                  throw 'Could not launch $url';
+                }
+              },
+          ));
+          start = match.end;
+        }
+
+        return '';
+      },
+      onNonMatch: (nonMatch) {
+        spans.add(TextSpan(text: nonMatch));
+        return '';
+      },
+    );
+    for (var span in spans) {
+      log(span.toString());
+    }
+    return TextSpan(children: spans);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,21 +133,8 @@ class ChatScreen extends StatelessWidget {
                                           : const Color.fromARGB(255, 80, 80, 80),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Linkify(
-                                      onOpen: (link) async {
-                                        final url = link.url.endsWith(')')
-                                            ? link.url.substring(0, link.url.length - 1)
-                                            : link.url;
-                                        final uri = Uri.parse(url);
-                                        if (await canLaunchUrl(uri)) {
-                                          await launchUrl(uri);
-                                        } else {
-                                          throw 'Could not launch $link';
-                                        }
-                                      },
-                                      text: message.message,
-                                      style: const TextStyle(color: Colors.white),
-                                      linkStyle: const TextStyle(color: Colors.blueAccent),
+                                    child: RichText(
+                                      text: buildMessageSpan(message.message),
                                     ),
                                   ),
                                 ),
