@@ -8,6 +8,7 @@ import '../controllers/chat_controller.dart';
 import '../widgets/base_scaffold.dart';
 import '../widgets/typing_indicator.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../widgets/custom_rich_text.dart';
 
 class ChatScreen extends StatelessWidget {
   ChatScreen({super.key});
@@ -19,44 +20,53 @@ class ChatScreen extends StatelessWidget {
 
   //TODO Links look weird in the chat, fix the link style
 
-  TextSpan buildMessageSpan(String message) {
-    //TODO Something wrong here, message repeats itself.
+  RichTextData textTransformation({
+    required BuildContext context,
+    required String text,
+  }) {
     final locRegex = RegExp(r'<loc_(\d+)>');
     final urlRegex = RegExp(r'<url_(https?://[^\s]+)>');
-    // final boldRegex = RegExp(r'\*\*(.*?)\*\*');
-    final spans = <TextSpan>[];
-    int start = 0;
+    final regex = RegExp(r'(<loc_(\d+)>|<url_(https?://[^\s]+)>)');
 
-    message.splitMapJoin(
-      RegExp(r'<loc_(\d+)>|<url_(https?://[^\s]+)>'), // Remove bold regex from here
-      onMatch: (match) {
-        final locMatch = locRegex.firstMatch(match[0]!);
-        final urlMatch = urlRegex.firstMatch(match[0]!);
-        // final boldMatch = boldRegex.firstMatch(match[0]!); // Comment out bold match
+    final matches = regex.allMatches(text);
 
-        if (locMatch != null) {
-          final locationNumber = locMatch.group(1);
-          spans.add(TextSpan(
-            text: message.substring(start, match.start),
-          ));
-          spans.add(TextSpan(
+    final richText = RichTextData(textWithTags: []);
+
+    var currentIndex = 0;
+
+    for (final match in matches) {
+      final beforeText = text.substring(currentIndex, match.start);
+
+      if (beforeText.isNotEmpty) {
+        richText.textWithTags.add(
+          TextWithTag(
+            text: beforeText,
+          ),
+        );
+      }
+
+      final locMatch = locRegex.firstMatch(match.group(0)!);
+      final urlMatch = urlRegex.firstMatch(match.group(0)!);
+
+      if (locMatch != null) {
+        final locationNumber = locMatch.group(1);
+        richText.textWithTags.add(
+          TextWithTag(
             text: 'loc_$locationNumber',
             style: TextStyle(color: Colors.blue),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 final locationId = int.tryParse(locationNumber ?? '');
                 if (locationId != null) {
-                  Get.offAndToNamed('/map', arguments: {'initialLocationId': locationId});
+                  Get.offNamed('/map', arguments: {'initialLocationId': locationId});
                 }
               },
-          ));
-          start = match.end;
-        } else if (urlMatch != null) {
-          final url = urlMatch.group(1);
-          spans.add(TextSpan(
-            text: message.substring(start, match.start),
-          ));
-          spans.add(TextSpan(
+          ),
+        );
+      } else if (urlMatch != null) {
+        final url = urlMatch.group(1);
+        richText.textWithTags.add(
+          TextWithTag(
             text: url,
             style: TextStyle(color: Colors.blue),
             recognizer: TapGestureRecognizer()
@@ -68,21 +78,24 @@ class ChatScreen extends StatelessWidget {
                   throw 'Could not launch $url';
                 }
               },
-          ));
-          start = match.end;
-        }
+          ),
+        );
+      }
 
-        return '';
-      },
-      onNonMatch: (nonMatch) {
-        spans.add(TextSpan(text: nonMatch));
-        return '';
-      },
-    );
-    for (var span in spans) {
-      log(span.toString());
+      currentIndex = match.end;
     }
-    return TextSpan(children: spans);
+
+    final remainingText = text.substring(currentIndex);
+
+    if (remainingText.isNotEmpty) {
+      richText.textWithTags.add(
+        TextWithTag(
+          text: remainingText,
+        ),
+      );
+    }
+
+    return richText;
   }
 
   @override
@@ -133,8 +146,11 @@ class ChatScreen extends StatelessWidget {
                                           : const Color.fromARGB(255, 80, 80, 80),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: RichText(
-                                      text: buildMessageSpan(message.message),
+                                    child: CustomRichText(
+                                      richTextData: textTransformation(
+                                        context: context,
+                                        text: message.message,
+                                      ),
                                     ),
                                   ),
                                 ),
