@@ -12,8 +12,6 @@ import 'package:meu_assistant/constants/api_info.dart';
 import 'package:meu_assistant/models/map_location.dart';
 import 'package:meu_assistant/services/map_data.dart';
 
-//TODO Add University ring stops
-
 class MapService extends GetxController {
   final _controller = Completer<GoogleMapController>();
   final _campusCenter = LatLng(36.786659, 34.525297);

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,8 +15,6 @@ class ChatScreen extends StatelessWidget {
 
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
-  //TODO Links look weird in the chat, fix the link style
 
   RichTextData textTransformation({
     required BuildContext context,
@@ -50,9 +46,11 @@ class ChatScreen extends StatelessWidget {
 
       if (locMatch != null) {
         final locationNumber = locMatch.group(1);
+        final locationKey = 'loc_$locationNumber';
+        final locationName = AppLocalizations.of(context)!.getString(locationKey);
         richText.textWithTags.add(
           TextWithTag(
-            text: 'loc_$locationNumber',
+            text: locationName,
             style: TextStyle(color: Colors.blue),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
@@ -261,5 +259,70 @@ class ChatScreen extends StatelessWidget {
         );
       }),
     );
+  }
+}
+
+extension AppLocalizationsExtension on AppLocalizations {
+  String getString(String key) {
+    //TODO Deniz, yeni lokasyonlar eklendiğinde burayı güncelle, önemli.
+    final map = {
+      'loc_1': loc_1,
+      'loc_2': loc_2,
+      'loc_3': loc_3,
+      'loc_4': loc_4,
+      'loc_5': loc_5,
+      'loc_6': loc_6,
+      'loc_7': loc_7,
+      'loc_8': loc_8,
+      'loc_9': loc_9,
+      'loc_10': loc_10,
+      'loc_11': loc_11,
+      'loc_12': loc_12,
+      'loc_13': loc_13,
+      'loc_14': loc_14,
+      'loc_15': loc_15,
+      'loc_16': loc_16,
+      'loc_17': loc_17,
+      'loc_18': loc_18,
+      'loc_19': loc_19,
+      'loc_20': loc_20,
+      'loc_21': loc_21,
+      'loc_22': loc_22,
+      'loc_23': loc_23,
+      'loc_24': loc_24,
+      'loc_25': loc_25,
+      'loc_26': loc_26,
+      'loc_27': loc_27,
+      'loc_28': loc_28,
+      'loc_29': loc_29,
+      'loc_30': loc_30,
+      'loc_31': loc_31,
+      'loc_32': loc_32,
+      'loc_33': loc_33,
+      'loc_34': loc_34,
+      'loc_35': loc_35,
+      'loc_36': loc_36,
+      'loc_37': loc_37,
+      'loc_38': loc_38,
+      'loc_39': loc_39,
+      'loc_40': loc_40,
+      'loc_41': loc_41,
+      'loc_42': loc_42,
+      'loc_43': loc_43,
+      'loc_44': loc_44,
+      'loc_45': loc_45,
+      'loc_46': loc_46,
+      'loc_47': loc_47,
+      'loc_48': loc_48,
+      'loc_49': loc_49,
+      'loc_50': loc_50,
+      'loc_51': loc_51,
+      'loc_52': loc_52,
+      'loc_53': loc_53,
+      'loc_54': loc_54,
+      'loc_55': loc_55,
+      'loc_56': loc_56,
+    };
+    return map[key] ?? key;
   }
 }

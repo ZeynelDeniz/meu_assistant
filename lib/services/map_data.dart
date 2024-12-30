@@ -436,7 +436,7 @@ final List<LatLng> ringRoutePoints = [
 
 List<MapLocation> getRingStops(BuildContext context) {
   return [
-    //TODO Add more stops and names to app_en.arb and app_tr.arb
+    //TODO Deniz, Add more stops and names to app_en.arb and app_tr.arb
     MapLocation(
       id: 1000, //TODO Fix later
       name: "KYK Kız Yurdu Durağı",

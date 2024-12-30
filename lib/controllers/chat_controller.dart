@@ -12,8 +12,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/chat_message.dart';
 
-//TODO Connect the map pins, add a button to navigate from chat to map with the selected location
-
 class ChatController extends GetxController {
   final RxList<ChatMessage> _messages = <ChatMessage>[].obs;
   List<ChatMessage> get messages => _messages.reversed.toList();
@@ -128,8 +126,6 @@ class ChatController extends GetxController {
   }
 
   String formattedMessage(String message) {
-    log('Message without Format: $message');
-
     // Remove messages written in []
     final regex = RegExp(r'\[.*?\]');
     message = message.replaceAll(regex, '');
@@ -151,7 +147,12 @@ class ChatController extends GetxController {
       return '<url_$url>'; // Placeholder for clickable URL
     });
 
-    log('Message with Format: $message');
+    // Find and replace URLs within angle brackets with a placeholder
+    final angleBracketUrlRegex = RegExp(r'<(https?://[^\s]+)>');
+    message = message.replaceAllMapped(angleBracketUrlRegex, (match) {
+      final url = match.group(1);
+      return '<url_$url>'; // Placeholder for clickable URL
+    });
 
     return message.trim();
   }
@@ -214,9 +215,8 @@ class ChatController extends GetxController {
       final decodedResponse = utf8.decode(response.bodyBytes);
       final data = jsonDecode(decodedResponse);
       String replyMessage = data['text'];
-      replyMessage += ' loc_45'; //TODO Temporary, implement later.
 
-      log('Reply message: $replyMessage');
+      log('Unformatted Reply message: $replyMessage');
 
       // Format the reply message
       replyMessage = formattedMessage(replyMessage);
